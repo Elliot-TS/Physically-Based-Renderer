@@ -15,6 +15,7 @@ inline bool IsNaN(T x) {
     return false;
 }
 
+// 2D
 // Tuple2 Definition
 template <template <typename> class Child, typename T>
 class Tuple2 {
@@ -207,8 +208,8 @@ class Vector2 : public Tuple2<Vector2, T> {
         : Tuple2<pbrt::Vector2, T>(T(v.x), T(v.y)) {}
 
     // TODO: Fix this conversion from Point2 to Vector2
-    //template <typename U>
-    //explicit Vector2(Point2<U> p);
+    template <typename U>
+    explicit Vector2(Point2<U> p);
 };
 
 // Vector2* Definitions
@@ -272,9 +273,317 @@ class Point2 : public Tuple2<Point2, T> {
     }
 };
 
+// TODO: Point2 Inline Functions
+
 // Point2* Definitions
 using Point2f = Point2<Float>;
 using Point2i = Point2<int>;
 
+// 3D
+// Tuple3 Definition
+template <template <typename> class Child, typename T>
+class Tuple3 {
+  public:
+    // Tuple3 Public Methods
+    Tuple3() = default;
+    
+    Tuple3(T x, T y, T z) : x(x), y(y), z(z) { DCHECK(!HasNaN()); }
+
+    bool HasNaN() const { return IsNaN(x) || IsNaN(y) || IsNaN(z); }
+
+    T operator[](int i) const {
+        DCHECK(i >= 0 && i <= 2);
+        if (i == 0)
+            return x;
+        if (i == 1)
+            return y;
+        return z;
+    }
+
+    
+    T &operator[](int i) {
+        DCHECK(i >= 0 && i <= 2);
+        if (i == 0)
+            return x;
+        if (i == 1)
+            return y;
+        return z;
+    }
+
+    template <typename U>
+     auto operator+(Child<U> c) const -> Child<decltype(T{} + U{})> {
+        DCHECK(!c.HasNaN());
+        return {x + c.x, y + c.y, z + c.z};
+    }
+
+    static const int nDimensions = 3;
+
+    Tuple3(Child<T> c) {
+        DCHECK(!c.HasNaN());
+        x = c.x;
+        y = c.y;
+        z = c.z;
+    }
+
+    Child<T> &operator=(Child<T> c) {
+        DCHECK(!c.HasNaN());
+        x = c.x;
+        y = c.y;
+        z = c.z;
+        return static_cast<Child<T> &>(*this);
+    }
+
+    template <typename U>
+     Child<T> &operator+=(Child<U> c) {
+        DCHECK(!c.HasNaN());
+        x += c.x;
+        y += c.y;
+        z += c.z;
+        return static_cast<Child<T> &>(*this);
+    }
+
+    template <typename U>
+     auto operator-(Child<U> c) const -> Child<decltype(T{} - U{})> {
+        DCHECK(!c.HasNaN());
+        return {x - c.x, y - c.y, z - c.z};
+    }
+    template <typename U>
+     Child<T> &operator-=(Child<U> c) {
+        DCHECK(!c.HasNaN());
+        x -= c.x;
+        y -= c.y;
+        z -= c.z;
+        return static_cast<Child<T> &>(*this);
+    }
+
+    
+    bool operator==(Child<T> c) const { return x == c.x && y == c.y && z == c.z; }
+    
+    bool operator!=(Child<T> c) const { return x != c.x || y != c.y || z != c.z; }
+
+    template <typename U>
+     auto operator*(U s) const -> Child<decltype(T{} * U{})> {
+        return {s * x, s * y, s * z};
+    }
+    template <typename U>
+     Child<T> &operator*=(U s) {
+        DCHECK(!IsNaN(s));
+        x *= s;
+        y *= s;
+        z *= s;
+        return static_cast<Child<T> &>(*this);
+    }
+
+    template <typename U>
+     auto operator/(U d) const -> Child<decltype(T{} / U{})> {
+        DCHECK_NE(d, 0);
+        return {x / d, y / d, z / d};
+    }
+    template <typename U>
+     Child<T> &operator/=(U d) {
+        DCHECK_NE(d, 0);
+        x /= d;
+        y /= d;
+        z /= d;
+        return static_cast<Child<T> &>(*this);
+    }
+    
+    Child<T> operator-() const { return {-x, -y, -z}; }
+
+    friend std::ostream& operator<<(std::ostream& os, const Child<T>& obj) {
+        os << "[ " << obj.x << ", " << obj.y << ", " << obj.z << " ]";
+        return os;
+    }
+
+    // Tuple3 Public Members
+    T x{}, y{}, z{};
+};
+
+// Tuple3 Inline Functions
+template <template <class> class C, typename T, typename U>
+ inline auto operator*(U s, Tuple3<C, T> t) -> C<decltype(T{} * U{})> {
+    return t * s;
+}
+
+template <template <class> class C, typename T>
+ inline C<T> Abs(Tuple3<C, T> t) {
+    using std::abs;
+    return {abs(t.x), abs(t.y), abs(t.z)};
+}
+
+template <template <class> class C, typename T>
+ inline C<T> Ceil(Tuple3<C, T> t) {
+    using std::ceil;
+    return {ceil(t.x), ceil(t.y), ceil(t.z)};
+}
+
+template <template <class> class C, typename T>
+ inline C<T> Floor(Tuple3<C, T> t) {
+    using std::floor;
+    return {floor(t.x), floor(t.y), floor(t.z)};
+}
+
+template <template <class> class C, typename T>
+ inline auto Lerp(Float t, Tuple3<C, T> t0, Tuple3<C, T> t1) {
+    return (1 - t) * t0 + t * t1;
+}
+
+template <template <class> class C, typename T>
+ inline C<T> FMA(Float a, Tuple3<C, T> b, Tuple3<C, T> c) {
+    return {FMA(a, b.x, c.x), FMA(a, b.y, c.y), FMA(a, b.z, c.z)};
+}
+
+template <template <class> class C, typename T>
+ inline C<T> FMA(Tuple3<C, T> a, Float b, Tuple3<C, T> c) {
+    return FMA(b, a, c);
+}
+
+template <template <class> class C, typename T>
+ inline C<T> Min(Tuple3<C, T> t1, Tuple3<C, T> t2) {
+    using std::min;
+    return {min(t1.x, t2.x), min(t1.y, t2.y), min(t1.z, t2.z)};
+}
+
+template <template <class> class C, typename T>
+ inline T MinComponentValue(Tuple3<C, T> t) {
+    using std::min;
+    return min({t.x, t.y, t.z});
+}
+
+template <template <class> class C, typename T>
+ inline int MinComponentIndex(Tuple3<C, T> t) {
+    return (t.x < t.y) ? ((t.x < t.z) ? 0 : 2) : ((t.y < t.z) ? 1 : 2);
+}
+
+template <template <class> class C, typename T>
+ inline C<T> Max(Tuple3<C, T> t1, Tuple3<C, T> t2) {
+    using std::max;
+    return {max(t1.x, t2.x), max(t1.y, t2.y), max(t1.z, t2.z)};
+}
+
+template <template <class> class C, typename T>
+ inline T MaxComponentValue(Tuple3<C, T> t) {
+    using std::max;
+    return max({t.x, t.y, t.z});
+}
+
+template <template <class> class C, typename T>
+ inline int MaxComponentIndex(Tuple3<C, T> t) {
+    return (t.x > t.y) ? ((t.x > t.z) ? 0 : 2) : ((t.y > t.z) ? 1 : 2);
+}
+
+template <template <class> class C, typename T>
+ inline C<T> Permute(Tuple3<C, T> t, std::array<int, 3> p) {
+    return {t[p[0]], t[p[1]], t[p[2]]};
+}
+
+template <template <class> class C, typename T>
+ inline T HProd(Tuple3<C, T> t) {
+    return t.x * t.y * t.z;
+}
+
+// Vector3 Definition
+template <typename T>
+class Vector3 : public Tuple3<Vector3, T> {
+  public:
+    // Vector3 Public Methods
+    using Tuple3<Vector3, T>::x;
+    using Tuple3<Vector3, T>::y;
+    using Tuple3<Vector3, T>::z;
+
+    Vector3() = default;
+    
+    Vector3(T x, T y, T z) : Tuple3<pbrt::Vector3, T>(x, y, z) {}
+
+    template <typename U>
+     explicit Vector3(Vector3<U> v)
+        : Tuple3<pbrt::Vector3, T>(T(v.x), T(v.y), T(v.z)) {}
+
+    template <typename U>
+    explicit Vector3(Point3<U> p);
+    // TODO: Fix when implementing Normal3 
+    //template <typename U>
+     //explicit Vector3(Normal3<U> n);
+};
+
+// Vector3* Definitions
+using Vector3f = Vector3<Float>;
+using Vector3i = Vector3<int>;
+
+// TODO: Vector3fi
+
+// Point3 Definition
+template <typename T>
+class Point3 : public Tuple3<Point3, T> {
+  public:
+    // Point3 Public Methods
+    using Tuple3<Point3, T>::x;
+    using Tuple3<Point3, T>::y;
+    using Tuple3<Point3, T>::z;
+    using Tuple3<Point3, T>::HasNaN;
+    using Tuple3<Point3, T>::operator+;
+    using Tuple3<Point3, T>::operator+=;
+    using Tuple3<Point3, T>::operator*;
+    using Tuple3<Point3, T>::operator*=;
+
+    Point3() = default;
+    
+    Point3(T x, T y, T z) : Tuple3<pbrt::Point3, T>(x, y, z) {}
+
+    // We can't do using operator- above, since we don't want to pull in
+    // the Point-Point -> Point one so that we can return a vector
+    // instead...
+    
+    Point3<T> operator-() const { return {-x, -y, -z}; }
+
+    template <typename U>
+     explicit Point3(Point3<U> p)
+        : Tuple3<pbrt::Point3, T>(T(p.x), T(p.y), T(p.z)) {}
+    template <typename U>
+     explicit Point3(Vector3<U> v)
+        : Tuple3<pbrt::Point3, T>(T(v.x), T(v.y), T(v.z)) {}
+
+    template <typename U>
+     auto operator+(Vector3<U> v) const -> Point3<decltype(T{} + U{})> {
+        DCHECK(!v.HasNaN());
+        return {x + v.x, y + v.y, z + v.z};
+    }
+    template <typename U>
+     Point3<T> &operator+=(Vector3<U> v) {
+        DCHECK(!v.HasNaN());
+        x += v.x;
+        y += v.y;
+        z += v.z;
+        return *this;
+    }
+
+    template <typename U>
+     auto operator-(Vector3<U> v) const -> Point3<decltype(T{} - U{})> {
+        DCHECK(!v.HasNaN());
+        return {x - v.x, y - v.y, z - v.z};
+    }
+    template <typename U>
+     Point3<T> &operator-=(Vector3<U> v) {
+        DCHECK(!v.HasNaN());
+        x -= v.x;
+        y -= v.y;
+        z -= v.z;
+        return *this;
+    }
+
+    template <typename U>
+     auto operator-(Point3<U> p) const -> Vector3<decltype(T{} - U{})> {
+        DCHECK(!p.HasNaN());
+        return {x - p.x, y - p.y, z - p.z};
+    }
+};
+
+// Point3* Definitions
+using Point3f = Point3<Float>;
+using Point3i = Point3<int>;
+
+// TODO: Point3fi and beyond
+// TODO: When Implementing Normal3, fix above todo
+// TODO: Vector Inline functions
 }
 

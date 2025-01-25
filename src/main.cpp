@@ -1,19 +1,12 @@
 #include <iostream>
 #include <string>
-#include "pbrt/util/vecmath.h"
+#include "pbrt/ray.h"
 
 using namespace pbrt;
 
 int main(int arcg, char *argv[]) {
-    Vector2<bool> t1;
-    Vector2<int> t2(5,3);
-    Vector2<float> t3(5.32f, -43.f);
-    Vector2<std::string> t4("Hello", "World");
-
-    std::cout << t2 << std::endl;
-    t2 += t3;
-    std::cout << t2 << std::endl;
-    std::cout << Abs(t2) << std::endl;
+    Ray ray(Point3f(0,0,0), Vector3f(0,0,-1), 0);
+    std::cout << ray << std::endl;
 
 
     // Ray tracing in a weekend
