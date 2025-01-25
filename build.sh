@@ -1,4 +1,4 @@
 #!/bin/bash
 cd bin 
-cmake ..
+cmake ../src
 make
