@@ -1,32 +1,27 @@
 #include <iostream>
-#include <string>
 #include "pbrt/ray.h"
 
 using namespace pbrt;
 
 int main(int arcg, char *argv[]) {
-    Ray ray(Point3f(0,0,0), Vector3f(0,0,-1), 0);
-    std::cout << ray << std::endl;
-
-
     // Ray tracing in a weekend
-    //int nx = 200;
-    //int ny = 100;
-    //std::cout << "P3\n" << nx << " " << ny << "\n255\n";
+    int nx = 200;
+    int ny = 100;
+    std::cout << "P3\n" << nx << " " << ny << "\n255\n";
 
-    //for (int j = ny-1; j >= 0; j--) {
-        //for (int i = 0; i < nx; i++) {
-            //Vector3<float> col(
-                //float(i) / float(nx),
-                //float(j) / float(ny),
-                //0.2
-            //);
-            //int ir = int(255.99*col.x);
-            //int ig = int(255.99*col.y);
-            //int ib = int(255.99*col.z);
-            //std::cout << ir << " " << ig << " " << ib << std::endl;
-        //}
-    //}
+    for (int j = ny-1; j >= 0; j--) {
+        for (int i = 0; i < nx; i++) {
+            Vector3<float> col(
+                float(i) / float(nx),
+                float(j) / float(ny),
+                0.2
+            );
+            int ir = int(255.99*col.x);
+            int ig = int(255.99*col.y);
+            int ib = int(255.99*col.z);
+            std::cout << ir << " " << ig << " " << ib << std::endl;
+        }
+    }
         
 
 
