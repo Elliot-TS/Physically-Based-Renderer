@@ -1,3 +1,5 @@
+// Mostly copied from PBRT
+#pragma once
 #include "util/vecmath.h"
 
 namespace pbrt{

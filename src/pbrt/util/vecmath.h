@@ -1,4 +1,5 @@
-#pragma onceu
+// Mostly copied from PBRT Code
+#pragma once
 #include <string>
 #include <iostream>
 #include <cmath>
@@ -353,7 +354,7 @@ class Tuple3 {
   public:
     // Tuple3 Public Methods
     Tuple3() = default;
-    
+    Tuple3(T x): x(x), y(x), z(x) { DCHECK(!HasNaN());}    
     Tuple3(T x, T y, T z) : x(x), y(y), z(z) { DCHECK(!HasNaN()); }
 
     bool HasNaN() const { return IsNaN(x) || IsNaN(y) || IsNaN(z); }
@@ -559,7 +560,7 @@ class Vector3 : public Tuple3<Vector3, T> {
     using Tuple3<Vector3, T>::z;
 
     Vector3() = default;
-    
+    Vector3(T x) : Tuple3<pbrt::Vector3, T>(x) {};    
     Vector3(T x, T y, T z) : Tuple3<pbrt::Vector3, T>(x, y, z) {}
 
     template <typename U>
@@ -695,7 +696,7 @@ class Point3 : public Tuple3<Point3, T> {
     using Tuple3<Point3, T>::operator*=;
 
     Point3() = default;
-    
+    Point3(T x) : Tuple3<pbrt::Point3, T>(x) {}    
     Point3(T x, T y, T z) : Tuple3<pbrt::Point3, T>(x, y, z) {}
 
     // We can't do using operator- above, since we don't want to pull in
@@ -777,7 +778,7 @@ class Normal3 : public Tuple3<Normal3, T> {
     using Tuple3<Normal3, T>::operator*=;
 
     Normal3() = default;
-    
+    Normal3(T x) : Tuple3<pbrt::Normal3, T>(x) {}    
     Normal3(T x, T y, T z) : Tuple3<pbrt::Normal3, T>(x, y, z) {}
     template <typename U>
     explicit Normal3<T>(Normal3<U> v)

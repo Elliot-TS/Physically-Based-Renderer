@@ -1,3 +1,5 @@
+// Mostly copied from PBRT
+#pragma once
 #include "float.h"
 
 // Mathematical Constants
