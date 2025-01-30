@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include "pbrt/ray.h"
 #include "pbrt/shapes.h"
 #include "pbrt/cpu/primitive.h"
@@ -42,8 +43,19 @@ int main(int arcg, char *argv[]) {
     Vector3f vertical(0, 2, 0);
     Point3f origin(0,0,0);
 
-    Sphere sphere(Point3f(0,0,-1), 0.5);
-    GeometricPrimitive sphPrim(&sphere);
+    //Sphere sphere1(Point3f(0,0,-1), 0.5);
+    //GeometricPrimitive sphPrim1(&sphere1);
+
+    //Sphere sphere2(Point3f(5,-10,-30), 20);
+    //GeometricPrimitive sphPrim2(&sphere2);
+
+    Primitive *spheres[2] = { 
+        new GeometricPrimitive(new Sphere
+                (Point3f(0,0,-1), 0.5)),
+        new GeometricPrimitive(new Sphere
+                (Point3f(0, -100.5, -1), 100)),
+    };
+    SimpleAggregate sphPrims(spheres, 2);
 
     for (int j = ny-1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {
@@ -54,7 +66,7 @@ int main(int arcg, char *argv[]) {
                 origin, 
                 lower_left_corner + u*horizontal + v*vertical
             );
-            Vector3f col = color(r, sphPrim);
+            Vector3f col = color(r, sphPrims);
 
             std::cout
                 << int(255.99 * col.x) << " "

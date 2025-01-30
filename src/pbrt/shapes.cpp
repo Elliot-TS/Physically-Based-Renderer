@@ -13,7 +13,7 @@ namespace pbrt {
         
         if (discriminant > 0) {
             Float temp = (-b - sqrt(b*b - a*c)) / a;
-            if (temp < tMax) {
+            if (temp < tMax && temp > 0) {
                 // Surface Interaction contains
                 //  point and normal
                 SurfaceInteraction surfIntrc;
@@ -31,7 +31,7 @@ namespace pbrt {
             }
 
             temp = (-b + sqrt(b*b - a*c)) / a;
-            if (temp < tMax) {
+            if (temp < tMax && temp > 0) {
                 SurfaceInteraction surfIntrc;
                 surfIntrc.point = ray(temp);
                 surfIntrc.normal = Normal3f

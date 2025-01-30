@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_subdirectory(pbrt)
 add_library(pbrt
     pbrt/shapes.cpp
+    pbrt/cpu/primitive.cpp
 )
 
 add_executable(Renderer main.cpp)

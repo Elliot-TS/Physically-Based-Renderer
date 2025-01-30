@@ -34,4 +34,20 @@ namespace pbrt {
             }
     };
 
+    class SimpleAggregate : public Primitive {
+        public:
+            Primitive **primitives; // List of pointers to primitives
+            int numPrimitives;
+
+            SimpleAggregate() {}
+            SimpleAggregate
+                (Primitive **primitives, int numPrimitives):
+                primitives(primitives),
+                numPrimitives(numPrimitives) {}
+            
+            std::optional<ShapeIntersection> Intersect
+                (const Ray &ray, Float tMax = Infinity) const;
+            bool IntersectP
+                (const Ray &ray, Float tMax = Infinity) const;
+    };
 }
