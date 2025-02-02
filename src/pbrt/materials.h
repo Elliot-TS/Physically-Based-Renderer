@@ -38,4 +38,26 @@ namespace pbrt {
                 return true;
             }
     };
+
+
+    class Metal : public Material {
+        public:
+            Vector3f albedo;
+            Sampler *sampler;
+            Float roughness;
+
+            Metal(const Vector3f albedo, Float roughness, Sampler *sampler): 
+                albedo(albedo), roughness(roughness), sampler(sampler) { roughness = roughness > 1 ? 1 : roughness; }
+            virtual bool scatter(
+                    const Ray& r_in, 
+                    const SurfaceInteraction& si, 
+                    Vector3f& attenuation,
+                    Ray& scattered)
+            {
+                Vector3f reflected = Reflect(Normalize(r_in.direction), si.normal);
+                scattered = Ray(si.point, reflected + Vector3f(roughness*sampler->s_uSphere()));
+                attenuation = albedo;
+                return (Dot(scattered.direction, si.normal) > 0);
+            }
+    };
 }

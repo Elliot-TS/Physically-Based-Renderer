@@ -685,8 +685,8 @@ template <typename U>
 Vector3<T>::Vector3(Normal3<U> n) : Tuple3<pbrt::Vector3, T>(T(n.x), T(n.y), T(n.z)) {}
 
 template <typename T>
-inline Vector3<T> Reflect(const Vector3<T>& v, const Vector3<T>& n) {
-    return v - 2*Dot(v,n)*n;
+inline Vector3<T> Reflect(const Vector3<T>& v, const Normal3<T>& n) {
+    return v - Vector3<T>(2*Dot(v,n)*n);
 }
 // TODO: Vector3fi
 
@@ -821,21 +821,24 @@ template <typename T>
 inline auto Dot(Normal3<T> n, Vector3<T> v) ->
     typename TupleLength<T>::type {
     DCHECK(!n.HasNaN() && !v.HasNaN());
-    return FMA(n.x, v.x, SumOfProducts(n.y, v.y, n.z, v.z));
+    //return FMA(n.x, v.x, SumOfProducts(n.y, v.y, n.z, v.z));
+    return n.x*v.x + n.y*v.y + n.z*v.z;
 }
 
 template <typename T>
 inline auto Dot(Vector3<T> v, Normal3<T> n) ->
     typename TupleLength<T>::type {
     DCHECK(!v.HasNaN() && !n.HasNaN());
-    return FMA(n.x, v.x, SumOfProducts(n.y, v.y, n.z, v.z));
+    //return FMA(n.x, v.x, SumOfProducts(n.y, v.y, n.z, v.z));
+    return n.x*v.x + n.y*v.y + n.z*v.z;
 }
 
 template <typename T>
 inline auto Dot(Normal3<T> n1, Normal3<T> n2) ->
     typename TupleLength<T>::type {
     DCHECK(!n1.HasNaN() && !n2.HasNaN());
-    return FMA(n1.x, n2.x, SumOfProducts(n1.y, n2.y, n1.z, n2.z));
+    //return FMA(n1.x, n2.x, SumOfProducts(n1.y, n2.y, n1.z, n2.z));
+    return n1.x*n2.x + n1.y*n2.y + n1.z*n2.z;
 }
 
 template <typename T>

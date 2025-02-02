@@ -11,6 +11,7 @@ namespace pbrt {
         public:
             virtual inline Float sample() = 0;
             virtual inline Vector3f s_Vector3f() = 0;
+            virtual inline Point3f s_uSphere() = 0;
     };
 
     class UniformSampler : public Sampler{
@@ -33,6 +34,15 @@ namespace pbrt {
             }
             inline Vector3f s_Vector3f() {
                 return Vector3f(sample(), sample(), sample());
+            }
+            inline Point3f s_uSphere()
+            {
+                Vector3f p;
+                do {
+                    p = 2.0*s_Vector3f() - Vector3f(1,1,1);
+                } while (LengthSquared(p) >= 1.0);
+
+                return Point3f(p);
             }
     };
 }

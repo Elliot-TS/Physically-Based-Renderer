@@ -10,15 +10,6 @@ using namespace pbrt;
 
 
 // Based off RTW
-Point3f random_in_unit_sphere(UniformSampler &s)
-{
-    Vector3f p;
-    do {
-        p = 2.0*s.s_Vector3f() - Vector3f(1,1,1);
-    } while (LengthSquared(p) >= 1.0);
-
-    return Point3f(p);
-}
 
 // Based off RTW
 Float hit_sphere(const Point3f center, Float radius, const Ray& r) {
@@ -73,15 +64,21 @@ int main(int argc, char *argv[]) {
 
     UniformSampler *sampler = new UniformSampler();
 
-    Primitive *spheres[2] = { 
+    Primitive *spheres[4] = { 
         new GeometricPrimitive(
                 new Sphere(Point3f(0,0,-1), 0.5),
                 new Lambertian(Vector3f(0.8,0.3,0.3), sampler)),
         new GeometricPrimitive(
                 new Sphere(Point3f(0, -100.5, -1), 100),
-                new Lambertian(Vector3f(0.8,0.8,0.8), sampler)),
+                new Lambertian(Vector3f(0.8,0.8,0.01), sampler)),
+        new GeometricPrimitive(
+                new Sphere(Point3f(1,0,-1), 0.5),
+                new Metal(Vector3f(0.8, 0.6, 0.2), 1.0, sampler)),
+        new GeometricPrimitive(
+                new Sphere(Point3f(-1,0,-1), 0.5),
+                new Metal(Vector3f(0.8,0.8,0.8), 0.3, sampler))
     };
-    SimpleAggregate sphPrims(spheres, 2);
+    SimpleAggregate sphPrims(spheres, 4);
 
 
     for (int j = ny-1; j >= 0; j--) {
