@@ -1,4 +1,5 @@
 #pragma once
+#include "pbrt.h"
 #include "util/vecmath.h"
 
 namespace pbrt {
@@ -12,5 +13,6 @@ public:
     // Public Members
     Point3f point;
     Normal3f normal;
+    Material *material;
 };
 }

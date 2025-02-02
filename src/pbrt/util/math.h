@@ -18,3 +18,11 @@ template<typename T>
 inline constexpr T Sqr(T x) {
     return x*x;
 }
+
+
+// TODO: The original function from PBRT had a bunch of
+// error correcting stuff with Intervals
+template<typename T>
+inline T DifferenceOfProducts(T a, T b, T c, T d) {
+    return a*b - c*d;
+}

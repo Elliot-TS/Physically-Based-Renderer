@@ -1,10 +1,24 @@
 #include <iostream>
-#include <string>
+//#include <sstream> // For command-line arguments
+#include "pbrt/samplers.h"
 #include "pbrt/ray.h"
 #include "pbrt/shapes.h"
 #include "pbrt/cpu/primitive.h"
+#include "pbrt/camera.h"
 
 using namespace pbrt;
+
+
+// Based off RTW
+Point3f random_in_unit_sphere(UniformSampler &s)
+{
+    Vector3f p;
+    do {
+        p = 2.0*s.s_Vector3f() - Vector3f(1,1,1);
+    } while (LengthSquared(p) >= 1.0);
+
+    return Point3f(p);
+}
 
 // Based off RTW
 Float hit_sphere(const Point3f center, Float radius, const Ray& r) {
@@ -18,56 +32,74 @@ Float hit_sphere(const Point3f center, Float radius, const Ray& r) {
 }
 
 // Based off RTW
-Vector3f color(const Ray& r, const Primitive& shape) {
+Vector3f color(const Ray& r, const Primitive& shape, int bounces) {
     auto si = shape.Intersect(r);
-    //Float t = hit_sphere(Point3f(0,0,-1), 0.5, r);
-    if (si)
-        return 0.5*Vector3f
-            (si->interaction.normal + Normal3f(1.0));
+    if (si) {
+        Ray scattered;
+        Vector3f attenuation;
+        if (bounces > 0 && 
+                si->interaction.material->scatter(
+                    r, si->interaction, attenuation, scattered)
+           )
+        {
+            return HorizontalProduct(
+                    attenuation,
+                    color(scattered, shape, bounces+1));
+        }
+        else return Vector3f(0,0,0);
+    }
 
-    Vector3f unit_direction = Normalize(r.direction);
+    Vector3f unit_direction= Normalize(r.direction);
     Float t = 0.5*(unit_direction.y + 1.0);
     return (1.0-t)  * Vector3f(1,1,1) 
             + t     * Vector3f(0.5, 0.7, 1.0);
 }
 
 // Based off RTW and PBRT
-int main(int arcg, char *argv[]) {
+int main(int argc, char *argv[]) {
+    // How to Read command line arguments
+    //if (argc >= 2) {
+        //std::istringstream iss( argv[1] );
+        //if (!(iss >> val)) return -1;
+    //} else return -1;
+
     // Ray tracing in a weekend
     int nx = 200;
     int ny = 100;
+    int ns = 100;
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
 
-    Vector3f lower_left_corner(-2, -1, -1);
-    Vector3f horizontal(4, 0, 0);
-    Vector3f vertical(0, 2, 0);
-    Point3f origin(0,0,0);
+    Camera cam;
 
-    //Sphere sphere1(Point3f(0,0,-1), 0.5);
-    //GeometricPrimitive sphPrim1(&sphere1);
-
-    //Sphere sphere2(Point3f(5,-10,-30), 20);
-    //GeometricPrimitive sphPrim2(&sphere2);
+    UniformSampler *sampler = new UniformSampler();
 
     Primitive *spheres[2] = { 
-        new GeometricPrimitive(new Sphere
-                (Point3f(0,0,-1), 0.5)),
-        new GeometricPrimitive(new Sphere
-                (Point3f(0, -100.5, -1), 100)),
+        new GeometricPrimitive(
+                new Sphere(Point3f(0,0,-1), 0.5),
+                new Lambertian(Vector3f(0.8,0.3,0.3), sampler)),
+        new GeometricPrimitive(
+                new Sphere(Point3f(0, -100.5, -1), 100),
+                new Lambertian(Vector3f(0.8,0.8,0.8), sampler)),
     };
     SimpleAggregate sphPrims(spheres, 2);
 
+
     for (int j = ny-1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {
-            Float u = Float(i) / Float(nx);
-            Float v = Float(j) / Float(ny);
-            
-            Ray r(
-                origin, 
-                lower_left_corner + u*horizontal + v*vertical
-            );
-            Vector3f col = color(r, sphPrims);
+            Vector3f col(0,0,0);
 
+            for (int s = 0; s < ns; s++) {
+                Float u = Float(i + sampler->sample()) / Float(nx);
+                Float v = Float(j + sampler->sample()) / Float(ny);
+
+                Ray r = cam.get_ray(u, v);
+                col += color(r, sphPrims, 4);
+            }
+            col /= ns;
+            col = Vector3f(
+                    std::sqrt(col.x),
+                    std::sqrt(col.y),
+                    std::sqrt(col.z));
             std::cout
                 << int(255.99 * col.x) << " "
                 << int(255.99 * col.y) << " "

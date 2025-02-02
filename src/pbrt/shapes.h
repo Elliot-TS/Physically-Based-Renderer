@@ -25,6 +25,8 @@ namespace pbrt {
 
 
     class Sphere : public Shape { 
+        private:
+            Float tMin = 0.001;
         public:
             // Methods
             Sphere() {}

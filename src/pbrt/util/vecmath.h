@@ -583,6 +583,11 @@ template <typename U>
 Vector3<T>::Vector3(Point3<U> p) : Tuple3<pbrt::Vector3, T>(T(p.x), T(p.y), T(p.z)) {}
 
 template <typename T>
+inline Vector3<T> HorizontalProduct(Vector3<T> v1, Vector3<T> v2) {
+    return {v1.x*v2.x, v1.y*v2.y, v1.z*v2.z};
+}
+
+template <typename T>
 inline Vector3<T> Cross(Vector3<T> v1, Normal3<T> v2) {
     DCHECK(!v1.HasNaN() && !v2.HasNaN());
     return {DifferenceOfProducts(v1.y, v2.z, v1.z, v2.y),
@@ -679,6 +684,10 @@ template <typename T>
 template <typename U>
 Vector3<T>::Vector3(Normal3<U> n) : Tuple3<pbrt::Vector3, T>(T(n.x), T(n.y), T(n.z)) {}
 
+template <typename T>
+inline Vector3<T> Reflect(const Vector3<T>& v, const Vector3<T>& n) {
+    return v - 2*Dot(v,n)*n;
+}
 // TODO: Vector3fi
 
 // Point3 Definition
@@ -872,4 +881,5 @@ inline Vector3<T> FaceForward(Vector3<T> v, Normal3<T> n2) {
     return (Dot(v, n2) < 0.f) ? -v : v;
 }
 }
+
 

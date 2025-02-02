@@ -2,6 +2,7 @@
 #pragma once
 #include "../ray.h"
 #include "../shapes.h"
+#include "../materials.h"
 
 namespace pbrt {
 
@@ -14,7 +15,7 @@ namespace pbrt {
                 (const Ray &ray, Float tMax = Infinity) const = 0;
 
             // Public Members
-            // Material material;
+            Material *material;
             // Light areaLight;
     };
 
@@ -22,12 +23,17 @@ namespace pbrt {
     class GeometricPrimitive : public Primitive {
         public:
             Shape *shape;
+            Material *material;
 
-            GeometricPrimitive(Shape *shape): shape(shape) {}
+            GeometricPrimitive(Shape *shape, Material *material): 
+                shape(shape), material(material) {}
 
             std::optional<ShapeIntersection> Intersect
                 (const Ray &ray, Float tMax) const {
-                    return shape->Intersect(ray, tMax);
+                    std::optional<ShapeIntersection> si = shape->Intersect(ray, tMax);
+                    if (!si) return {};
+                    si->interaction.material = material;
+                    return si;
                 }
             bool IntersectP (const Ray &ray, Float tMax) const {
                 return shape->IntersectP(ray, tMax);
@@ -46,7 +52,7 @@ namespace pbrt {
                 numPrimitives(numPrimitives) {}
             
             std::optional<ShapeIntersection> Intersect
-                (const Ray &ray, Float tMax = Infinity) const;
+                (const Ray &ray, Float tMax = Infinity) const ;
             bool IntersectP
                 (const Ray &ray, Float tMax = Infinity) const;
     };

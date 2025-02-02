@@ -3,7 +3,8 @@
 namespace pbrt {
     // Sphere
     std::optional<ShapeIntersection> Sphere::Intersect
-        (const Ray &ray, Float tMax) const{
+        (const Ray &ray, Float tMax) const
+    {
         Vector3f oc = ray.origin - center;
 
         Float a = Dot(ray.direction, ray.direction);
@@ -13,7 +14,7 @@ namespace pbrt {
         
         if (discriminant > 0) {
             Float temp = (-b - sqrt(b*b - a*c)) / a;
-            if (temp < tMax && temp > 0) {
+            if (temp < tMax && temp > tMin) {
                 // Surface Interaction contains
                 //  point and normal
                 SurfaceInteraction surfIntrc;
@@ -31,7 +32,7 @@ namespace pbrt {
             }
 
             temp = (-b + sqrt(b*b - a*c)) / a;
-            if (temp < tMax && temp > 0) {
+            if (temp < tMax && temp > tMin) {
                 SurfaceInteraction surfIntrc;
                 surfIntrc.point = ray(temp);
                 surfIntrc.normal = Normal3f
