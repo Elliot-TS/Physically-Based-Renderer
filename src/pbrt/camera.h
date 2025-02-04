@@ -3,6 +3,9 @@
 
 namespace pbrt{
 
+    /**
+     * Define Camera Class
+    **/
     class Camera{
         public:
             Point3f origin;
@@ -45,7 +48,7 @@ namespace pbrt{
                 vertical *= 2;
             }
 
-            Ray get_ray(Float u, Float v) {
+            inline Ray get_ray(const Float u, const Float v) const {
                 return Ray(
                         origin,
                         lower_left_corner + u*horizontal + v*vertical - origin);

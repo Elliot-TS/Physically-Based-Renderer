@@ -1,6 +1,6 @@
 // Mostly copied from PBRT
 #pragma once
-#include "util/vecmath.h"
+#include "math/vecmath.h"
 
 namespace pbrt{
 // Ray Definition
@@ -10,7 +10,7 @@ class Ray {
     // Ray Public Methods
     bool HasNaN() const { return (origin.HasNaN() || direction.HasNaN()); }
 
-    friend std::ostream& operator<<(std::ostream& os, const Ray ray) {
+    inline friend std::ostream& operator<<(std::ostream& os, const Ray ray) {
         os << "["
             << " o: " << ray.origin
             << " d: " << ray.direction
@@ -20,7 +20,7 @@ class Ray {
         return os;
     }
     
-    Point3f operator()(Float t) const { return origin + direction * t; }
+    inline Point3f operator()(Float t) const { return origin + direction * t; }
 
     Ray() = default;
     Ray(Point3f origin, Vector3f direction, Float time = 0.f/*, Medium medium = nullptr*/)

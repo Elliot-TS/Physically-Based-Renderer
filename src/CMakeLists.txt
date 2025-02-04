@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_subdirectory(pbrt)
 add_library(pbrt
     pbrt/shapes.cpp
-    pbrt/cpu/primitive.cpp
+    pbrt/primitive.cpp
 )
 
 add_executable(Renderer main.cpp)
@@ -21,6 +21,20 @@ target_link_libraries(
 
 target_include_directories(
     Renderer PUBLIC
+    "${PROJECT_BINARY_DIR}"
+    #"${PROJECT_SOURCE_DIR}/pbrt"
+)
+
+# DEBUG
+add_executable(Debug pbrt/test/sizes.cpp)
+
+target_link_libraries(
+    Debug PUBLIC
+    pbrt
+)
+
+target_include_directories(
+    Debug PUBLIC
     "${PROJECT_BINARY_DIR}"
     #"${PROJECT_SOURCE_DIR}/pbrt"
 )

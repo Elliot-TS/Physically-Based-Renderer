@@ -1,7 +1,6 @@
 #pragma once
 #include <optional>
 #include "ray.h"
-#include "util/float.h"
 #include "interaction.h"
 
 namespace pbrt {
@@ -39,7 +38,7 @@ namespace pbrt {
                 (const Ray &ray, Float tMax=Infinity) const;
             
             // Members
-            Point3f center;
             Float radius;
+            Point3f center;
     };
 }

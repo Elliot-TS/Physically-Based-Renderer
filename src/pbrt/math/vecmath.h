@@ -4,10 +4,23 @@
 #include <iostream>
 #include <cmath>
 #include <array>
-#include "check.h"
-#include "float.h"
 #include "../pbrt.h"
+#include "../test/check.h"
 #include "math.h"
+
+/**
+Required by:
+ * ray.h
+ * interaction.h
+Classes
+ * Tuple2
+ * Tuple3
+ * Vector2
+ * Vector3
+ * Normal3
+ * Point2
+ * Point3
+**/
 
 namespace {
 // TupleLength Definition
@@ -559,13 +572,14 @@ class Vector3 : public Tuple3<Vector3, T> {
     using Tuple3<Vector3, T>::y;
     using Tuple3<Vector3, T>::z;
 
-    Vector3() = default;
-    Vector3(T x) : Tuple3<pbrt::Vector3, T>(x) {};    
-    Vector3(T x, T y, T z) : Tuple3<pbrt::Vector3, T>(x, y, z) {}
+    Vector3() { CREATED("Vector3"); }
+    Vector3(T x) : Tuple3<pbrt::Vector3, T>(x) { CREATED("Vector3"); }
+    Vector3(T x, T y, T z) : Tuple3<pbrt::Vector3, T>(x, y, z) { CREATED("Vector3"); }
 
     template <typename U>
      explicit Vector3(Vector3<U> v)
-        : Tuple3<pbrt::Vector3, T>(T(v.x), T(v.y), T(v.z)) {}
+        : Tuple3<pbrt::Vector3, T>(T(v.x), T(v.y), T(v.z)) 
+     { CREATED("Vector3"); }
 
     template <typename U>
     explicit Vector3(Point3<U> p);

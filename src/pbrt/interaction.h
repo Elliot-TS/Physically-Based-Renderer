@@ -1,6 +1,6 @@
 #pragma once
 #include "pbrt.h"
-#include "util/vecmath.h"
+#include "math/vecmath.h"
 
 namespace pbrt {
 class SurfaceInteraction {

@@ -1,8 +1,8 @@
 // Based off PBRT and RTW, but also my own code
 #pragma once
-#include "../ray.h"
-#include "../shapes.h"
-#include "../materials.h"
+#include "ray.h"
+#include "shapes.h"
+#include "materials.h"
 
 namespace pbrt {
 
@@ -28,14 +28,14 @@ namespace pbrt {
             GeometricPrimitive(Shape *shape, Material *material): 
                 shape(shape), material(material) {}
 
-            std::optional<ShapeIntersection> Intersect
+            inline std::optional<ShapeIntersection> Intersect
                 (const Ray &ray, Float tMax) const {
                     std::optional<ShapeIntersection> si = shape->Intersect(ray, tMax);
                     if (!si) return {};
                     si->interaction.material = material;
                     return si;
                 }
-            bool IntersectP (const Ray &ray, Float tMax) const {
+            inline bool IntersectP (const Ray &ray, Float tMax) const {
                 return shape->IntersectP(ray, tMax);
             }
     };
@@ -45,14 +45,13 @@ namespace pbrt {
             Primitive **primitives; // List of pointers to primitives
             int numPrimitives;
 
-            SimpleAggregate() {}
             SimpleAggregate
                 (Primitive **primitives, int numPrimitives):
-                primitives(primitives),
-                numPrimitives(numPrimitives) {}
-            
+                    primitives(primitives),
+                    numPrimitives(numPrimitives) {}
+
             std::optional<ShapeIntersection> Intersect
-                (const Ray &ray, Float tMax = Infinity) const ;
+                (const Ray &ray, Float tMax = Infinity) const;
             bool IntersectP
                 (const Ray &ray, Float tMax = Infinity) const;
     };

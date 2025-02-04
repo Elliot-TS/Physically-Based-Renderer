@@ -3,7 +3,7 @@
 #include "pbrt/samplers.h"
 #include "pbrt/ray.h"
 #include "pbrt/shapes.h"
-#include "pbrt/cpu/primitive.h"
+#include "pbrt/primitive.h"
 #include "pbrt/camera.h"
 
 using namespace pbrt;
