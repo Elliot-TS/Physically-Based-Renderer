@@ -1,6 +1,6 @@
 // Mostly copied from PBRT
 #pragma once
-#include "math/vecmath.h"
+#include "pbrt/math/vecmath.h"
 
 namespace pbrt{
 // Ray Definition

@@ -1,7 +1,7 @@
 #pragma once
 #include <optional>
-#include "ray.h"
-#include "interaction.h"
+#include "pbrt/ray.h"
+#include "pbrt/interaction.h"
 
 namespace pbrt {
     

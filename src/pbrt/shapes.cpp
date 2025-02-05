@@ -1,5 +1,5 @@
 // Adapted from RTW and PBRT
-#include "shapes.h"
+#include "pbrt/shapes.h"
 namespace pbrt {
     // Sphere
     std::optional<ShapeIntersection> Sphere::Intersect

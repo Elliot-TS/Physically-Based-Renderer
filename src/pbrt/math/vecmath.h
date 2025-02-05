@@ -4,9 +4,9 @@
 #include <iostream>
 #include <cmath>
 #include <array>
-#include "../pbrt.h"
-#include "../test/check.h"
-#include "math.h"
+#include "pbrt/pbrt.h"
+#include "pbrt/test/check.h"
+#include "pbrt/math/math.h"
 
 /**
 Required by:

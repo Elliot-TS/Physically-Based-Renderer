@@ -1,5 +1,5 @@
 #pragma once
-#include "ray.h"
+#include "pbrt/ray.h"
 
 namespace pbrt{
 

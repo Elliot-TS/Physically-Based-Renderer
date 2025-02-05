@@ -1,8 +1,8 @@
 // Based off PBRT and RTW, but also my own code
 #pragma once
-#include "ray.h"
-#include "shapes.h"
-#include "materials.h"
+#include "pbrt/ray.h"
+#include "pbrt/shapes.h"
+#include "pbrt/materials.h"
 
 namespace pbrt {
 

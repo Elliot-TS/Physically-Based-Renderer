@@ -1,0 +1,20 @@
+[
+{
+  "directory": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer",
+  "command": "/usr/bin/c++  -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer\" -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src\" -std=gnu++17 -o CMakeFiles/Renderer.dir/main.cpp.o -c \"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/main.cpp\"",
+  "file": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/main.cpp",
+  "output": "CMakeFiles/Renderer.dir/main.cpp.o"
+},
+{
+  "directory": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/pbrt",
+  "command": "/usr/bin/c++  -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src\" -std=gnu++17 -o CMakeFiles/pbrt.dir/shapes.cpp.o -c \"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/pbrt/shapes.cpp\"",
+  "file": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/pbrt/shapes.cpp",
+  "output": "pbrt/CMakeFiles/pbrt.dir/shapes.cpp.o"
+},
+{
+  "directory": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/pbrt",
+  "command": "/usr/bin/c++  -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src\" -std=gnu++17 -o CMakeFiles/pbrt.dir/primitive.cpp.o -c \"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/pbrt/primitive.cpp\"",
+  "file": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/pbrt/primitive.cpp",
+  "output": "pbrt/CMakeFiles/pbrt.dir/primitive.cpp.o"
+}
+]

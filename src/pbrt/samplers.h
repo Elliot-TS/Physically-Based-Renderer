@@ -1,6 +1,6 @@
 #pragma once
 #include <random>
-#include "math/vecmath.h"
+#include "pbrt/math/vecmath.h"
 
 namespace pbrt {
     class Sampler{

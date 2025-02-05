@@ -1,4 +1,4 @@
-#include "primitive.h"
+#include "pbrt/primitive.h"
 
 namespace pbrt{
 

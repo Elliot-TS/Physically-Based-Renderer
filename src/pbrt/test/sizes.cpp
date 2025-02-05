@@ -1,8 +1,8 @@
 #include <iostream>
 #include <string>
-#include "../math/vecmath.h"
-#include "../shapes.h"
-#include "../primitive.h"
+#include "pbrt/math/vecmath.h"
+#include "pbrt/shapes.h"
+#include "pbrt/primitive.h"
 using namespace pbrt;
 
 #define PrintSize(x,n) std::cout << #x << std::string(1+n, '\t') << sizeof(x) << std::endl

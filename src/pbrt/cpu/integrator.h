@@ -1,5 +1,6 @@
 #pragma once
-#include <vector>
+#include "pbrt/primitive.h"
+
 class Integrator {
     public:
         // Methods

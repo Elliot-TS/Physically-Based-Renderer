@@ -1,7 +1,7 @@
 #pragma once
-#include "interaction.h"
-#include "samplers.h"
-#include "ray.h"
+#include "pbrt/interaction.h"
+#include "pbrt/samplers.h"
+#include "pbrt/ray.h"
 
 namespace pbrt {
     class Material {
