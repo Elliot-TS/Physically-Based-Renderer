@@ -22,7 +22,7 @@ namespace pbrt {
             Sampler *sampler;
 
             Lambertian(const Vector3f &albedo, Sampler *sampler) : albedo(albedo), sampler(sampler) {}
-            virtual inline bool scatter(
+            virtual bool scatter(
                     const Ray& r_in, 
                     const SurfaceInteraction& si, 
                     Vector3f& attenuation,
@@ -48,7 +48,7 @@ namespace pbrt {
 
             Metal(const Vector3f albedo, Float roughness, Sampler *sampler): 
                 albedo(albedo), roughness(roughness), sampler(sampler) { roughness = roughness > 1 ? 1 : roughness; }
-            virtual inline bool scatter(
+            virtual bool scatter(
                     const Ray& r_in, 
                     const SurfaceInteraction& si, 
                     Vector3f& attenuation,

@@ -34,7 +34,7 @@ namespace pbrt {
 
             std::optional<ShapeIntersection> Intersect
                 (const Ray &ray, Float tMax=Infinity) const;
-            bool IntersectP
+            inline bool IntersectP
                 (const Ray &ray, Float tMax=Infinity) const;
             
             // Members

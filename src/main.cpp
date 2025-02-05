@@ -5,6 +5,7 @@
 #include "pbrt/shapes.h"
 #include "pbrt/primitive.h"
 #include "pbrt/camera.h"
+#include "pbrt/integrator.h"
 
 using namespace pbrt;
 
@@ -23,28 +24,6 @@ Float hit_sphere(const Point3f center, Float radius, const Ray& r) {
 }
 
 // Based off RTW
-Vector3f color(const Ray& r, const Primitive& shape, int bounces) {
-    auto si = shape.Intersect(r);
-    if (si) {
-        Ray scattered;
-        Vector3f attenuation;
-        if (bounces > 0 && 
-                si->interaction.material->scatter(
-                    r, si->interaction, attenuation, scattered)
-           )
-        {
-            return HorizontalProduct(
-                    attenuation,
-                    color(scattered, shape, bounces+1));
-        }
-        else return Vector3f(0,0,0);
-    }
-
-    Vector3f unit_direction= Normalize(r.direction);
-    Float t = 0.5*(unit_direction.y + 1.0);
-    return (1.0-t)  * Vector3f(1,1,1) 
-            + t     * Vector3f(0.5, 0.7, 1.0);
-}
 
 // Based off RTW and PBRT
 int main(int argc, char *argv[]) {
@@ -58,7 +37,6 @@ int main(int argc, char *argv[]) {
     int nx = 200;
     int ny = 100;
     int ns = 100;
-    std::cout << "P3\n" << nx << " " << ny << "\n255\n";
 
     Camera cam;
 
@@ -79,31 +57,34 @@ int main(int argc, char *argv[]) {
                 new Metal(Vector3f(0.8,0.8,0.8), 0.3, sampler))
     };
     SimpleAggregate sphPrims(spheres, 4);
+    ImageTileIntegrator intr(&cam, sampler, &sphPrims, {});
+
+    intr.Render();
 
 
-    for (int j = ny-1; j >= 0; j--) {
-        for (int i = 0; i < nx; i++) {
-            Vector3f col(0,0,0);
+    //for (int j = ny-1; j >= 0; j--) {
+        //for (int i = 0; i < nx; i++) {
+            //Vector3f col(0,0,0);
 
-            for (int s = 0; s < ns; s++) {
-                Float u = Float(i + sampler->sample()) / Float(nx);
-                Float v = Float(j + sampler->sample()) / Float(ny);
+            //for (int s = 0; s < ns; s++) {
+                //Float u = Float(i + sampler->sample()) / Float(nx);
+                //Float v = Float(j + sampler->sample()) / Float(ny);
 
-                Ray r = cam.get_ray(u, v);
-                col += color(r, sphPrims, 4);
-            }
-            col /= ns;
-            col = Vector3f(
-                    std::sqrt(col.x),
-                    std::sqrt(col.y),
-                    std::sqrt(col.z));
-            std::cout
-                << int(255.99 * col.x) << " "
-                << int(255.99 * col.y) << " "
-                << int(255.99 * col.z) << " "
-                << "\n";
-        }
-    }
+                //Ray r = cam.get_ray(u, v);
+                //col += color(r, sphPrims, 4);
+            //}
+            //col /= ns;
+            //col = Vector3f(
+                    //std::sqrt(col.x),
+                    //std::sqrt(col.y),
+                    //std::sqrt(col.z));
+            //std::cout
+                //<< int(255.99 * col.x) << " "
+                //<< int(255.99 * col.y) << " "
+                //<< int(255.99 * col.z) << " "
+                //<< "\n";
+        //}
+    //}
         
 
 

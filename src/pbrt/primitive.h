@@ -28,14 +28,14 @@ namespace pbrt {
             GeometricPrimitive(Shape *shape, Material *material): 
                 shape(shape), material(material) {}
 
-            inline std::optional<ShapeIntersection> Intersect
+            std::optional<ShapeIntersection> Intersect
                 (const Ray &ray, Float tMax) const {
                     std::optional<ShapeIntersection> si = shape->Intersect(ray, tMax);
                     if (!si) return {};
                     si->interaction.material = material;
                     return si;
                 }
-            inline bool IntersectP (const Ray &ray, Float tMax) const {
+            bool IntersectP (const Ray &ray, Float tMax) const {
                 return shape->IntersectP(ray, tMax);
             }
     };

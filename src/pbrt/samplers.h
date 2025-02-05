@@ -8,9 +8,9 @@ namespace pbrt {
             std::mt19937 generator; 
 
         public:
-            virtual inline Float sample() = 0;
-            virtual inline Vector3f s_Vector3f() = 0;
-            virtual inline Point3f s_uSphere() = 0;
+            virtual Float sample() = 0;
+            virtual Vector3f s_Vector3f() = 0;
+            virtual Point3f s_uSphere() = 0;
     };
 
     class UniformSampler : public Sampler{
@@ -28,13 +28,13 @@ namespace pbrt {
                 std::uniform_real_distribution<Float> distribution(0.0, 1.0); 
             }
 
-            inline Float sample() {
+            Float sample() {
                 return distribution(generator); 
             }
-            inline Vector3f s_Vector3f() {
+            Vector3f s_Vector3f() {
                 return Vector3f(sample(), sample(), sample());
             }
-            inline Point3f s_uSphere()
+            Point3f s_uSphere()
             {
                 Vector3f p;
                 do {
