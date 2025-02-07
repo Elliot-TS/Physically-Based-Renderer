@@ -4,19 +4,22 @@ project(Renderer)
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 add_subdirectory(pbrt)
-#add_library(pbrt
-    #pbrt/shapes.cpp
-    #pbrt/primitive.cpp
-#)
 
-add_executable(Renderer main.cpp)
+find_package(
+    OpenCV 4.9.0 REQUIRED
+    COMPONENTS core imgproc highgui photo
+)
 
+add_executable(Renderer main.cpp display.cpp)
+
+include_directories( ${OpenCV_INCLUDE_DIRS} )
 target_link_libraries(
     Renderer PUBLIC
     pbrt
+    ${OpenCV_LIBS}
 )
 
 target_include_directories(

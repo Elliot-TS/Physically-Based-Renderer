@@ -1,98 +1,42 @@
 #include <iostream>
-//#include <sstream> // For command-line arguments
-#include "pbrt/samplers.h"
-#include "pbrt/ray.h"
-#include "pbrt/shapes.h"
-#include "pbrt/primitive.h"
-#include "pbrt/camera.h"
-#include "pbrt/integrator.h"
+#include "display.h"
+#include <math.h>
+//#include <chrono>
 
-using namespace pbrt;
+std::string Image::windowName = "Image";
 
+int main(int argc, char* argv[]) {
+    //using std::chrono::high_resolution_clock;
+    //using std::chrono::duration_cast;
+    //using std::chrono::duration;
+    //using std::chrono::milliseconds;
 
-// Based off RTW
+    const int nx = 3840;
+    const int ny = 2160;
+    Image img(nx, ny);
+    std::cout << "P3\n" << nx << " " << ny << "\n255\n";
 
-// Based off RTW
-Float hit_sphere(const Point3f center, Float radius, const Ray& r) {
-    Vector3f oc = r.origin - center;
-    Float a = Dot(r.direction, r.direction);
-    Float b = 2.0 * Dot(oc, r.direction);
-    Float c = Dot(oc, oc) - Sqr(radius);
-    Float discriminant = b*b - 4*a*c;
-    if (discriminant < 0) return -1.0;
-    else return (-b - sqrt(discriminant)) / (2.0*a);
-}
+    long loopCount = 0;
+    long maxLoops = 1000;
+    //auto t1 = high_resolution_clock::now();
+    while (loopCount == 0) {
+        loopCount++;
+        img.createImage([loopCount](const float ux, const float uy) -> Image::Color
+        {
+            return {
+                .red=uchar(ux*255),
+                .green=uchar(uy*255),
+                .blue=uchar(255*std::sin(loopCount/100.0))
+            };
+        });
 
-// Based off RTW
-
-// Based off RTW and PBRT
-int main(int argc, char *argv[]) {
-    // How to Read command line arguments
-    //if (argc >= 2) {
-        //std::istringstream iss( argv[1] );
-        //if (!(iss >> val)) return -1;
-    //} else return -1;
-
-    // Ray tracing in a weekend
-    int nx = 200;
-    int ny = 100;
-    int ns = 100;
-
-    Camera cam;
-
-    UniformSampler *sampler = new UniformSampler();
-
-    Primitive *spheres[4] = { 
-        new GeometricPrimitive(
-                new Sphere(Point3f(0,0,-1), 0.5),
-                new Lambertian(Vector3f(0.8,0.3,0.3), sampler)),
-        new GeometricPrimitive(
-                new Sphere(Point3f(0, -100.5, -1), 100),
-                new Lambertian(Vector3f(0.8,0.8,0.01), sampler)),
-        new GeometricPrimitive(
-                new Sphere(Point3f(1,0,-1), 0.5),
-                new Metal(Vector3f(0.8, 0.6, 0.2), 1.0, sampler)),
-        new GeometricPrimitive(
-                new Sphere(Point3f(-1,0,-1), 0.5),
-                new Metal(Vector3f(0.8,0.8,0.8), 0.3, sampler))
-    };
-    SimpleAggregate sphPrims(spheres, 4);
-    ImageTileIntegrator intr(&cam, sampler, &sphPrims, {});
-
-    intr.Render();
-
-
-    //for (int j = ny-1; j >= 0; j--) {
-        //for (int i = 0; i < nx; i++) {
-            //Vector3f col(0,0,0);
-
-            //for (int s = 0; s < ns; s++) {
-                //Float u = Float(i + sampler->sample()) / Float(nx);
-                //Float v = Float(j + sampler->sample()) / Float(ny);
-
-                //Ray r = cam.get_ray(u, v);
-                //col += color(r, sphPrims, 4);
-            //}
-            //col /= ns;
-            //col = Vector3f(
-                    //std::sqrt(col.x),
-                    //std::sqrt(col.y),
-                    //std::sqrt(col.z));
-            //std::cout
-                //<< int(255.99 * col.x) << " "
-                //<< int(255.99 * col.y) << " "
-                //<< int(255.99 * col.z) << " "
-                //<< "\n";
-        //}
-    //}
-        
-
-
-    // Convert command-line arguments to vector of strings TODO
-    // Declare variables for parsed command line TODO
-    // Process command-line arguments TODO
-    // Initialize pbrt TODO
-    // Parse provided scene description files TODO
-    // Render the scene TODO
-    // Clean up after rendering the scene TODO
+        img.Display();
+    }
+    //auto t2 = high_resolution_clock::now();
+    //auto ms_int = duration_cast<milliseconds>(t2-t1);
+    //duration<double, std::milli> ms_double = t2 - t1;
+    //std::cout << ms_int.count() << "ms\n";
+    //std::cout << ms_double.count() << "ms\n";
+    
+    return 0;
 }
