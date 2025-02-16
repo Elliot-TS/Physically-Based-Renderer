@@ -6,19 +6,33 @@ project(Renderer)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
+# Debug or Release
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+#set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+
 add_subdirectory(pbrt)
 
 find_package(
     OpenCV 4.9.0 REQUIRED
     COMPONENTS core imgproc highgui photo
 )
+find_package(
+    SDL3 REQUIRED CONFIG REQUIRED
+    COMPONENTS SDL3-shared
+)
 
-add_executable(Renderer main.cpp display.cpp)
+add_executable(Renderer WIN32 display_example.cpp)
 
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 target_link_libraries(
     Renderer PUBLIC
     pbrt
+    SDL3::SDL3
     ${OpenCV_LIBS}
 )
 

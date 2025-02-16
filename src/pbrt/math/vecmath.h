@@ -543,6 +543,12 @@ template <template <class> class C, typename T>
 }
 
 template <template <class> class C, typename T>
+inline C<T> ClampMax(Tuple3<C, T> t, T val) {
+    using std::min;
+    return {min(t.x, val), min(t.y, val), min(t.z, val)};
+}
+
+template <template <class> class C, typename T>
  inline T MaxComponentValue(Tuple3<C, T> t) {
     using std::max;
     return max({t.x, t.y, t.z});

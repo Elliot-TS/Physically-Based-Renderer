@@ -5,6 +5,10 @@
 #define DCHECK_NE(a, b) (CHECK(a != b))
 
 #define LOG(x) std::cout << x << std::endl
+#define ERROR(x) std::cerr << x << std::endl
+
+//#define ASSERT(condition, message) [&](){bool c = condition; if (!c) ERROR(message); return c;}()
+#define ASSERT(condition, message) condition
 
 // Log Move Semantics
 #ifndef LOG_MOVE
