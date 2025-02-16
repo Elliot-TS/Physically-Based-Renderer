@@ -1,7 +1,40 @@
 #pragma once
 #include "pbrt/ray.h"
+#include "pbrt/util/display.h"
 
 namespace pbrt{
+
+    class Film {
+        public:
+            const int width;
+            const int height;
+            Vector3f *imageSamples; // TODO: Consider Float
+            DisplayWindow *display;
+
+            // TODO: Something for saving the image to a file
+            Film(const int width, const int height) 
+                : width(width), height(height)
+            { 
+                imageSamples = new Vector3f[width*height];
+                display = new DisplayWindow(width, height);
+            }
+
+            // Adds value to the average of the last numSamples samples
+            void AddSample(Vector3f color, int x, int y, int numSamples) {
+                double invSamp = 1.0 / (numSamples + 1.0);
+                double sampRatio = double(numSamples) * invSamp;
+                int index = y*width + x;
+                imageSamples[index] = imageSamples[index]*sampRatio + color*invSamp; 
+            }
+
+            void UpdateDisplay() {
+                Uint32 *imageData = display->GetImageData();
+                for (int i = 0; i < width*height; i++) {
+                    imageData[i] = Color(ClampMax(imageSamples[i], 1.0));
+                }
+                display->UpdateImage();
+            }
+    };
 
     /**
      * Define Camera Class
@@ -12,14 +45,17 @@ namespace pbrt{
             Point3f lower_left_corner;
             Vector3f horizontal;
             Vector3f vertical;
+            Film *film; // I'm not understanding why I have to use a pointer
 
-            Camera() {
+            // TODO: Find a more elegant way of passing display
+            Camera(Film *film): film(film) {
                 lower_left_corner = Point3f(-2,-1,-1);
                 horizontal = Vector3f(4,0,0);
                 vertical = Vector3f(0,2,0);
                 origin = Point3f(0,0,0);
             }
-            Camera(Point3f origin, Vector3f direction, Float fov=67, Float aspectRatio = 2) : origin(origin) {
+
+            Camera(Film *film, Point3f origin, Vector3f direction, Float fov=67, Float aspectRatio = 2) : origin(origin), film(film) {
                 // Find the up vector
                 Vector3f up(0,1,0);
                 if (direction.x == 0 && 
