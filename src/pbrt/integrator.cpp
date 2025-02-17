@@ -40,24 +40,21 @@ Vector3f color(const Ray& r, const Primitive& shape, int bounces) {
 
     /** ImageTileIntegrator **/
     void ImageTileIntegrator::Render() {
-        /*bool quit = false;
+        bool quit = false;
 
         Sampler *sampler = samplerPrototype; // We're going to use a ScratchBuffer later, that's why we're making this alias
 
         int wid = camera->film->display->width;
         int hei = camera->film->display->height;
-        Uint32 *imageData = camera->film->display->GetImageData();
 
         // TODO: Render in waves
         int samples = 0;
-        while (!quit) {
-            // TODO: Displaying the window should be done in main concurrently
-            camera->film->display->Draw();
+        while (camera->film->display->isOpen) {
             for (int y = 0; y < hei; y++) {
                 for (int x = 0; x < wid; x++) {
                     Vector3f col(0,0,0);
 
-                    //// TODO: Multiple Samples
+                    // TODO: Multiple Samples
                     Float u = Float(x + sampler->sample()) / Float(wid);
                     Float v = Float(y + sampler->sample()) / Float(hei);
 
@@ -72,15 +69,13 @@ Vector3f color(const Ray& r, const Primitive& shape, int bounces) {
                     camera->film->AddSample(col, x,y, samples);
 
                 }
-                // TODO: There has to be a better way to quit
-                camera->film->display->CheckQuit(&quit);
-                if (quit) break;
+                if (!camera->film->display->isOpen) break;
             }
-            if (quit) break;
+            if (!camera->film->display->isOpen) break;
             samples++;
-            // Update the displayed image after each wave
             camera->film->UpdateDisplay();
-        }*/
+            std::cout << "New sample\n";
+        }
     }
     /*void ImageTileIntegrator::Render() {
         // TODO: Declare common variables for rendering image in tiles

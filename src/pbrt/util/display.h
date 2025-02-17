@@ -1,5 +1,7 @@
 #pragma once
 #include <mutex>
+#include <algorithm>
+#include <execution>
 #include <thread>
 #include <future>
 #include <chrono>
@@ -25,9 +27,9 @@ namespace pbrt{
         Color(Uint8 red, Uint8 green, Uint8 blue)
             : Color(red, green, blue, 255) {}
         Color(Vector3f color)
-            : Color(std::min(255*color.x, 255.0), 
-                    std::min(255*color.y, 255.0), 
-                    std::min(255*color.z, 255.0)) {}
+            : Color(std::min(255*std::max(color.x,0.0), 255.0), 
+                    std::min(255*std::max(color.y,0.0), 255.0), 
+                    std::min(255*std::max(color.z,0.0), 255.0)) {}
         Color(Uint32 color)
             : Color((color & RED) >> 24, 
                     (color & GREEN) >> 16, 
@@ -127,6 +129,16 @@ namespace pbrt{
                     return true;
                 }
             }
+
+            bool updateTexture() {
+                if (!ASSERT(SDL_UpdateTexture(texture, NULL, imageData, width*sizeof(Uint32)),
+                            "Failed to update texture: " << SDL_GetError())) 
+                {
+                    DisplayWindow::~DisplayWindow();
+                    return false;
+                }
+                return true;
+            }
             
             std::promise<void> windowClosed; // Signals when window closes
             std::future<void> waitClosed;
@@ -141,6 +153,20 @@ namespace pbrt{
                 if (window != nullptr) SDL_DestroyWindow(window);
 
                 closingWindow.unlock();
+            }
+
+            void Draw() {
+                // Copy the texture to the renderer
+                SDL_RenderTextureRotated(
+                        renderer, 
+                        texture, 
+                        NULL, 
+                        NULL,
+                        0, NULL,
+                        SDL_FLIP_VERTICAL);
+
+                // Present the frame
+                SDL_RenderPresent(renderer);
             }
         public:
             DisplayWindow(const int width, const int height, int refreshRate)
@@ -158,8 +184,6 @@ namespace pbrt{
                 if (SDL_is_initialized) SDL_Quit(); 
                 if (imageData != nullptr) delete[] imageData;
             }
-
-            Uint32 * GetImageData() { return imageData; }
             void Open() {
                 windowClosed = std::promise<void>();
                 waitClosed = windowClosed.get_future();
@@ -177,7 +201,7 @@ namespace pbrt{
                             }
                         }
 
-                        UpdateImage();
+                        updateTexture();
                         Draw();
 
                         // Wait before refreshing
@@ -188,37 +212,31 @@ namespace pbrt{
 
                 windowThread.detach();
             }
-
             void WaitUntilClosed() {
                 waitClosed.get();
             }
+            bool UpdateImage(const Uint32 *newImage, const unsigned int size) {
+                if (size > width*height) return false;
 
-            float time = 0;
-            void Draw() {
-
-                time += 0.1;
-                // Copy the texture to the renderer
-                SDL_RenderTextureRotated(
-                        renderer, 
-                        texture, 
-                        NULL, 
-                        NULL,
-                        time, NULL,
-                        SDL_FLIP_VERTICAL);
-
-                // Present the frame
-                SDL_RenderPresent(renderer);
+                std::copy_n(std::execution::par, newImage, size, imageData);
+                return updateTexture();
             }
+            // newImage is an array of Vector3f in range [0,1]
+            // Values larger than 1 are clamped to 1
+            bool UpdateImage(const Vector3f *newImage, const unsigned int size) {
+                if (size > width*height) return false;
+    
+                std::transform(std::execution::par,
+                        newImage, newImage + size, imageData,
+                        [](const Vector3f &v) {
+                            return Color(v);
+                        });
 
-            bool UpdateImage() {
-                if (!ASSERT(SDL_UpdateTexture(texture, NULL, imageData, width*sizeof(Uint32)),
-                            "Failed to update texture: " << SDL_GetError())) 
-                {
-                    DisplayWindow::~DisplayWindow();
-                    return false;
-                }
-                return true;
+                return updateTexture();
             }
-
+            void SetPixel(const unsigned int index, const Uint32 color) {
+                if (index >= width*height) return;
+                imageData[index] = color;
+            }
     };
 }

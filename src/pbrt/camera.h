@@ -24,15 +24,13 @@ namespace pbrt{
                 double invSamp = 1.0 / (numSamples + 1.0);
                 double sampRatio = double(numSamples) * invSamp;
                 int index = y*width + x;
-                imageSamples[index] = imageSamples[index]*sampRatio + color*invSamp; 
+                Vector3f col = imageSamples[index]*sampRatio + color*invSamp;
+                imageSamples[index] = col; 
+                display->SetPixel(index, Color(col));
             }
 
             void UpdateDisplay() {
-                Uint32 *imageData = display->GetImageData();
-                for (int i = 0; i < width*height; i++) {
-                    imageData[i] = Color(ClampMax(imageSamples[i], 1.0));
-                }
-                display->UpdateImage();
+                display->UpdateImage(imageSamples, width*height);
             }
     };
 

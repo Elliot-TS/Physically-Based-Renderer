@@ -70,6 +70,7 @@ int main(int argc, char *argv[]) {
     SimpleAggregate sphPrims(spheres, 4);
     ImageTileIntegrator intr(&cam, sampler, &sphPrims, {});
 
+    film.display->Open();
     intr.Render();
 //    film.display->UpdateImage();
 
