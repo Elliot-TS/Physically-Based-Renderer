@@ -28,6 +28,9 @@ Float hit_sphere(const Point3f center, Float radius, const Ray& r) {
 
 // Based off RTW and PBRT
 int main(int argc, char *argv[]) {
+    using std::chrono::high_resolution_clock; using std::chrono::duration_cast;
+    using std::chrono::duration;
+    using std::chrono::milliseconds;
     // How to Read command line arguments
     //if (argc >= 2) {
         //std::istringstream iss( argv[1] );
@@ -35,21 +38,13 @@ int main(int argc, char *argv[]) {
     //} else return -1;
 
     // Ray tracing in a weekend
-    int nx = 2000;
-    int ny = 1000;
+    float aspectRatio = 1.32;
+    int ny = 1556;
+    int nx = aspectRatio*ny;
     int ns = 100;
 
-    Uint32 c1 = Uint32(Color(100,100,100));
-    std::cout << Color(c1) << std::endl;
-    c1 = Color(c1) + Color(100,100,100);
-    std::cout << Color(c1) << std::endl;
-    c1 = (Color(c1) + Color(100,100,100));
-    std::cout << Color(c1) << std::endl;
-    c1 = (Color(c1) + Color(100,100,100));
-    std::cout << Color(c1) << std::endl;
-
     Film film(nx, ny);
-    Camera cam(&film);
+    Camera cam(&film, Point3f(0,1,-3), Vector3f(0,-0.8,1), 80, aspectRatio);
 
     UniformSampler *sampler = new UniformSampler();
 
@@ -71,7 +66,12 @@ int main(int argc, char *argv[]) {
     ImageTileIntegrator intr(&cam, sampler, &sphPrims, {});
 
     film.display->Open();
+    auto t1 = high_resolution_clock::now();
     intr.Render();
+    auto t2 = high_resolution_clock::now();
+    duration<double, std::milli> diff = t2 - t1;
+    std::cout << "Time: " << diff.count() << std::endl;
+    film.display->WaitUntilClosed();
 //    film.display->UpdateImage();
 
 

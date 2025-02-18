@@ -8,9 +8,10 @@ void pbrt::ParallelFor2D
  const unsigned int height,
  std::function<void(
      const unsigned int startIndex, 
-     const unsigned int endIndex)> forEachTile 
+     const unsigned int endIndex,
+     const uint8_t threadID)> forEachTile 
  ){
-    const unsigned int threads_per_processor = 1;
+    const unsigned int threads_per_processor = 16;
     unsigned int processor_count = std::thread::hardware_concurrency();
     processor_count = processor_count == 0 ? 1 : processor_count;
 
@@ -30,7 +31,8 @@ void pbrt::ParallelFor2D
         threads.push_back(std::thread(
                     forEachTile,
                     startIndex,
-                    startIndex + span));
+                    startIndex + span,
+                    uint8_t(i)));
     }
 
     for (int i = 0; i < threads.size(); ++i) {

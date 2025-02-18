@@ -1,6 +1,7 @@
 #pragma once
 #include "pbrt/ray.h"
 #include "pbrt/util/display.h"
+#include "pbrt/math/math.h"
 
 namespace pbrt{
 
@@ -20,11 +21,12 @@ namespace pbrt{
             }
 
             // Adds value to the average of the last numSamples samples
-            void AddSample(Vector3f color, int x, int y, int numSamples) {
-                double invSamp = 1.0 / (numSamples + 1.0);
-                double sampRatio = double(numSamples) * invSamp;
+            void AddSample(Vector3f color, int x, int y, unsigned int numSamples, unsigned int numNewSamples=1) {
+                double invSamp = 1.0 / (numSamples + double(numNewSamples));
+                double oldToTot = double(numSamples) * invSamp;
+                double newToTot = double(numNewSamples) * invSamp;
                 int index = y*width + x;
-                Vector3f col = imageSamples[index]*sampRatio + color*invSamp;
+                Vector3f col = imageSamples[index]*oldToTot+ color*newToTot;
                 imageSamples[index] = col; 
                 display->SetPixel(index, Color(col));
             }
@@ -70,7 +72,7 @@ namespace pbrt{
                 vertical = Cross(horizontal, direction);
 
                 // Find the field of view and aspectRatio
-                Float height = std::atan(fov);
+                Float height = std::atan(fov*2*Pi / 360);
                 horizontal *= height * aspectRatio;
                 vertical *= height;
 
