@@ -1,4 +1,8 @@
 #add_library(
     #util 
-    #vecmath.cpp
+    #parallel.cpp
+#)
+#target_include_directories(
+    #util PUBLIC
+    #"${PROJECT_SOURCE_DIR}"
 #)

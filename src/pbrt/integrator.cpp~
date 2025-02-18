@@ -50,39 +50,39 @@ Vector3f color(const Ray& r, const Primitive& shape, int bounces) {
 
         // TODO: Render in waves
         ParallelFor2D(wid, hei, 
-                [&](const unsigned int startIndex,
-                    const unsigned int endIndex)
+                [&](unsigned int startX,
+                    unsigned int startY,
+                    const unsigned int width,
+                    const unsigned int height)
                 {
-                   int samples = 0;
-                   while (camera->film->display->isOpen) {
-                       unsigned int x = startIndex % wid;
-                       unsigned int y = startIndex / wid;
-                       //while (camera->film->display->isOpen) {
-                       for (int i = startIndex; i < endIndex; i++) {
-                           x++;
-                           if (x >= wid) { x = 0; y++; }
+                    int samples = 0;
+                    while (camera->film->display->isOpen) {
+                        for (int y = startX; y < width; y++) {
+                            for (int x = startY; x < height; x++) {
+                            Vector3f col(0,0,0);
 
-                           Vector3f col(0,0,0);
+                            // TODO: Multiple Samples
+                            Float u = Float(x + sampler->sample()) / Float(wid);
+                            Float v = Float(y + sampler->sample()) / Float(hei);
 
-                           // TODO: Multiple Samples
-                           Float u = Float(x + sampler->sample()) / Float(wid);
-                           Float v = Float(y + sampler->sample()) / Float(hei);
+                            Ray r = camera->get_ray(u, v);
+                            col = color(r, *aggregate, 4);
+                            //// ^^ Multiple samples
 
-                           Ray r = camera->get_ray(u, v);
-                           col = color(r, *aggregate, 4);
-                           //// ^^ Multiple samples
+                            col = Vector3f(
+                                    std::sqrt(col.x),
+                                    std::sqrt(col.y),
+                                    std::sqrt(col.z));
+                            camera->film->AddSample(col, x,y, samples);
 
-                           col = Vector3f(
-                                   std::sqrt(col.x),
-                                   std::sqrt(col.y),
-                                   std::sqrt(col.z));
-                           camera->film->AddSample(col, x,y, samples);
-
-                           if (!camera->film->display->isOpen) break;
+                            }
+                            if (!camera->film->display->isOpen) break;
                         }
                         if (!camera->film->display->isOpen) break;
                         samples++;
-                   }
+                        //camera->film->UpdateDisplay();
+                        std::cout << "New sample\n";
+                    }
                 });
     }
     /*void ImageTileIntegrator::Render() {
