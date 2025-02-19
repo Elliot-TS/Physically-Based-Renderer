@@ -21,8 +21,8 @@ namespace pbrt {
 
         Vector3f unit_direction= Normalize(r.direction);
         Float t = 0.5*(unit_direction.y + 1.0);
-        return (1.0-t)  * Vector3f(1,1,1) 
-            + t     * Vector3f(0.5, 0.7, 1.0);
+        return (1.0-t)  * Vector3f(0.88,0.96,0.96) 
+            + t     * Vector3f(0.45, 0.73, 0.77);
     }
 
     /** Integrator **/

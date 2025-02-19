@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
     int ns = 100;
 
     Film film(nx, ny);
-    Camera cam(&film, Point3f(0,1,-3), Vector3f(0,-0.8,1), 80, aspectRatio);
+    Camera cam(&film, Point3f(0,1,-3), Vector3f(0,-0.6,1), 80, aspectRatio);
 
     UniformSampler *sampler = new UniformSampler();
 
@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
                 new Lambertian(Vector3f(0.8,0.3,0.3), sampler)),
         new GeometricPrimitive(
                 new Sphere(Point3f(0, -100.5, -1), 100),
-                new Lambertian(Vector3f(0.8,0.8,0.01), sampler)),
+                new Lambertian(Vector3f(0.34,0.58,0.47), sampler)),
         new GeometricPrimitive(
                 new Sphere(Point3f(1,0,-1), 0.5),
                 new Metal(Vector3f(0.8, 0.6, 0.2), 1.0, sampler)),
@@ -70,7 +70,8 @@ int main(int argc, char *argv[]) {
     intr.Render();
     auto t2 = high_resolution_clock::now();
     duration<double, std::milli> diff = t2 - t1;
-    std::cout << "Time: " << diff.count() << std::endl;
+    std::cout << "64 Samples" << std::endl;
+    std::cout << "Time: " << diff.count()/1000  << " seconds" << std::endl;
     film.display->WaitUntilClosed();
 //    film.display->UpdateImage();
 

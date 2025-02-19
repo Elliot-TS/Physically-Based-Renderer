@@ -3,7 +3,9 @@ cmake_minimum_required(VERSION 3.12)
 project(Renderer)
 
 # specify the C++ standard
-set(CMAKE_CXX_STANDARD 17)
+# latest feature needed:
+#  - std::span in util/buffercache.h
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 # Debug or Release
@@ -16,6 +18,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 
 add_subdirectory(pbrt)
+#add_subdirectory(pbrt/util)
 
 find_package(
     OpenCV 4.9.0 REQUIRED

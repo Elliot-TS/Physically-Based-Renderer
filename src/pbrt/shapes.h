@@ -1,5 +1,6 @@
 #pragma once
 #include <optional>
+#include <vector>
 #include "pbrt/ray.h"
 #include "pbrt/interaction.h"
 
@@ -40,5 +41,20 @@ namespace pbrt {
             // Members
             Float radius;
             Point3f center;
+    };
+
+
+    class TriangleMesh : Shape {
+        public:
+            int nTriangles, nVertices;
+            const int *vertexIndeces = nullptr;
+            const Vector3f *vertexPositions = nullptr;
+
+            TriangleMesh(
+                    std::vector<Point3f> positions,
+                    std::vector<int> indeces)
+                : nTriangles(indeces.size()/3), nVertices(positions.size())
+            {
+            }
     };
 }
