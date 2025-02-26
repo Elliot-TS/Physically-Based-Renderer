@@ -360,6 +360,176 @@ class Point2 : public Tuple2<Point2, T> {
 using Point2f = Point2<Float>;
 using Point2i = Point2<int>;
 
+// Bounds2 Definition
+template <typename T>
+class Bounds2 {
+  public:
+    // Bounds2 Public Methods
+        Bounds2() {
+        T minNum = std::numeric_limits<T>::lowest();
+        T maxNum = std::numeric_limits<T>::max();
+        pMin = Point2<T>(maxNum, maxNum);
+        pMax = Point2<T>(minNum, minNum);
+    }
+        explicit Bounds2(Point2<T> p) : pMin(p), pMax(p) {}
+        Bounds2(Point2<T> p1, Point2<T> p2) : pMin(Min(p1, p2)), pMax(Max(p1, p2)) {}
+    template <typename U>
+    explicit Bounds2(const Bounds2<U> &b) {
+        if (b.IsEmpty())
+            // Be careful about overflowing float->int conversions and the
+            // like.
+            *this = Bounds2<T>();
+        else {
+            pMin = Point2<T>(b.pMin);
+            pMax = Point2<T>(b.pMax);
+        }
+    }
+
+        Vector2<T> Diagonal() const { return pMax - pMin; }
+
+        T Area() const {
+        Vector2<T> d = pMax - pMin;
+        return d.x * d.y;
+    }
+
+        bool IsEmpty() const { return pMin.x >= pMax.x || pMin.y >= pMax.y; }
+
+        bool IsDegenerate() const { return pMin.x > pMax.x || pMin.y > pMax.y; }
+
+        int MaxDimension() const {
+        Vector2<T> diag = Diagonal();
+        if (diag.x > diag.y)
+            return 0;
+        else
+            return 1;
+    }
+        Point2<T> operator[](int i) const {
+        DCHECK(i == 0 || i == 1);
+        return (i == 0) ? pMin : pMax;
+    }
+        Point2<T> &operator[](int i) {
+        DCHECK(i == 0 || i == 1);
+        return (i == 0) ? pMin : pMax;
+    }
+        bool operator==(const Bounds2<T> &b) const {
+        return b.pMin == pMin && b.pMax == pMax;
+    }
+        bool operator!=(const Bounds2<T> &b) const {
+        return b.pMin != pMin || b.pMax != pMax;
+    }
+        Point2<T> Corner(int corner) const {
+        DCHECK(corner >= 0 && corner < 4);
+        return Point2<T>((*this)[(corner & 1)].x, (*this)[(corner & 2) ? 1 : 0].y);
+    }
+        Point2<T> Lerp(Point2f t) const {
+        return Point2<T>(pbrt::Lerp(t.x, pMin.x, pMax.x),
+                         pbrt::Lerp(t.y, pMin.y, pMax.y));
+    }
+        Vector2<T> Offset(Point2<T> p) const {
+        Vector2<T> o = p - pMin;
+        if (pMax.x > pMin.x)
+            o.x /= pMax.x - pMin.x;
+        if (pMax.y > pMin.y)
+            o.y /= pMax.y - pMin.y;
+        return o;
+    }
+        void BoundingSphere(Point2<T> *c, Float *rad) const {
+        *c = (pMin + pMax) / 2;
+        *rad = Inside(*c, *this) ? Distance(*c, pMax) : 0;
+    }
+
+    std::string ToString() const { return StringPrintf("[ %s - %s ]", pMin, pMax); }
+
+    // Bounds2 Public Members
+    Point2<T> pMin, pMax;
+};
+
+// Bounds[23][fi] Definitions
+using Bounds2f = Bounds2<Float>;
+using Bounds2i = Bounds2<int>;
+
+class Bounds2iIterator : public std::forward_iterator_tag { public:
+        Bounds2iIterator(const Bounds2i &b, const Point2i &pt) : p(pt), bounds(&b) {}
+        Bounds2iIterator operator++() {
+        advance();
+        return *this;
+    }
+        Bounds2iIterator operator++(int) {
+        Bounds2iIterator old = *this;
+        advance();
+        return old;
+    }
+        bool operator==(const Bounds2iIterator &bi) const {
+        return p == bi.p && bounds == bi.bounds;
+    }
+        bool operator!=(const Bounds2iIterator &bi) const {
+        return p != bi.p || bounds != bi.bounds;
+    }
+
+        Point2i operator*() const { return p; }
+
+  private:
+        void advance() {
+        ++p.x;
+        if (p.x == bounds->pMax.x) {
+            p.x = bounds->pMin.x;
+            ++p.y;
+        }
+    }
+    Point2i p;
+    const Bounds2i *bounds;
+};
+
+// Bounds2 Inline Functions
+template <typename T>
+inline Bounds2<T> Union(const Bounds2<T> &b1, const Bounds2<T> &b2) {
+    // Be careful to not run the two-point Bounds constructor.
+    Bounds2<T> ret;
+    ret.pMin = Min(b1.pMin, b2.pMin);
+    ret.pMax = Max(b1.pMax, b2.pMax);
+    return ret;
+}
+
+template <typename T>
+inline Bounds2<T> Intersect(const Bounds2<T> &b1, const Bounds2<T> &b2) {
+    // Be careful to not run the two-point Bounds constructor.
+    Bounds2<T> b;
+    b.pMin = Max(b1.pMin, b2.pMin);
+    b.pMax = Min(b1.pMax, b2.pMax);
+    return b;
+}
+
+template <typename T>
+inline bool Overlaps(const Bounds2<T> &ba, const Bounds2<T> &bb) {
+    bool x = (ba.pMax.x >= bb.pMin.x) && (ba.pMin.x <= bb.pMax.x);
+    bool y = (ba.pMax.y >= bb.pMin.y) && (ba.pMin.y <= bb.pMax.y);
+    return (x && y);
+}
+
+template <typename T>
+inline bool Inside(Point2<T> pt, const Bounds2<T> &b) {
+    return (pt.x >= b.pMin.x && pt.x <= b.pMax.x && pt.y >= b.pMin.y && pt.y <= b.pMax.y);
+}
+
+template <typename T>
+inline bool Inside(const Bounds2<T> &ba, const Bounds2<T> &bb) {
+    return (ba.pMin.x >= bb.pMin.x && ba.pMax.x <= bb.pMax.x && ba.pMin.y >= bb.pMin.y &&
+            ba.pMax.y <= bb.pMax.y);
+}
+
+template <typename T>
+inline bool InsideExclusive(Point2<T> pt, const Bounds2<T> &b) {
+    return (pt.x >= b.pMin.x && pt.x < b.pMax.x && pt.y >= b.pMin.y && pt.y < b.pMax.y);
+}
+
+template <typename T, typename U>
+inline Bounds2<T> Expand(const Bounds2<T> &b, U delta) {
+    Bounds2<T> ret;
+    ret.pMin = b.pMin - Vector2<T>(delta, delta);
+    ret.pMax = b.pMax + Vector2<T>(delta, delta);
+    return ret;
+}
+
 // 3D
 // Tuple3 Definition
 template <template <typename> class Child, typename T>
@@ -810,11 +980,11 @@ class Normal3 : public Tuple3<Normal3, T> {
     Normal3(T x) : Tuple3<pbrt::Normal3, T>(x) {}    
     Normal3(T x, T y, T z) : Tuple3<pbrt::Normal3, T>(x, y, z) {}
     template <typename U>
-    explicit Normal3<T>(Normal3<U> v)
+    explicit Normal3(Normal3<U> v)
         : Tuple3<pbrt::Normal3, T>(T(v.x), T(v.y), T(v.z)) {}
 
     template <typename U>
-    explicit Normal3<T>(Vector3<U> v)
+    explicit Normal3(Vector3<U> v)
         : Tuple3<pbrt::Normal3, T>(T(v.x), T(v.y), T(v.z)) {}
 };
 
@@ -903,6 +1073,275 @@ template <typename T>
 inline Vector3<T> FaceForward(Vector3<T> v, Normal3<T> n2) {
     return (Dot(v, n2) < 0.f) ? -v : v;
 }
+
+// Bounds3 Definition
+template <typename T>
+class Bounds3 {
+  public:
+    // Bounds3 Public Methods
+        Bounds3() {
+        T minNum = std::numeric_limits<T>::lowest();
+        T maxNum = std::numeric_limits<T>::max();
+        pMin = Point3<T>(maxNum, maxNum, maxNum);
+        pMax = Point3<T>(minNum, minNum, minNum);
+    }
+
+        explicit Bounds3(Point3<T> p) : pMin(p), pMax(p) {}
+
+        Bounds3(Point3<T> p1, Point3<T> p2) : pMin(Min(p1, p2)), pMax(Max(p1, p2)) {}
+
+        Point3<T> operator[](int i) const {
+        DCHECK(i == 0 || i == 1);
+        return (i == 0) ? pMin : pMax;
+    }
+        Point3<T> &operator[](int i) {
+        DCHECK(i == 0 || i == 1);
+        return (i == 0) ? pMin : pMax;
+    }
+
+        Point3<T> Corner(int corner) const {
+        DCHECK(corner >= 0 && corner < 8);
+        return Point3<T>((*this)[(corner & 1)].x, (*this)[(corner & 2) ? 1 : 0].y,
+                         (*this)[(corner & 4) ? 1 : 0].z);
+    }
+
+        Vector3<T> Diagonal() const { return pMax - pMin; }
+
+        T SurfaceArea() const {
+        Vector3<T> d = Diagonal();
+        return 2 * (d.x * d.y + d.x * d.z + d.y * d.z);
+    }
+
+        T Volume() const {
+        Vector3<T> d = Diagonal();
+        return d.x * d.y * d.z;
+    }
+
+        int MaxDimension() const {
+        Vector3<T> d = Diagonal();
+        if (d.x > d.y && d.x > d.z)
+            return 0;
+        else if (d.y > d.z)
+            return 1;
+        else
+            return 2;
+    }
+
+        Point3f Lerp(Point3f t) const {
+        return Point3f(pbrt::Lerp(t.x, pMin.x, pMax.x), pbrt::Lerp(t.y, pMin.y, pMax.y),
+                       pbrt::Lerp(t.z, pMin.z, pMax.z));
+    }
+
+        Vector3f Offset(Point3f p) const {
+        Vector3f o = p - pMin;
+        if (pMax.x > pMin.x)
+            o.x /= pMax.x - pMin.x;
+        if (pMax.y > pMin.y)
+            o.y /= pMax.y - pMin.y;
+        if (pMax.z > pMin.z)
+            o.z /= pMax.z - pMin.z;
+        return o;
+    }
+
+        void BoundingSphere(Point3<T> *center, Float *radius) const {
+        *center = (pMin + pMax) / 2;
+        *radius = Inside(*center, *this) ? Distance(*center, pMax) : 0;
+    }
+
+        bool IsEmpty() const {
+        return pMin.x >= pMax.x || pMin.y >= pMax.y || pMin.z >= pMax.z;
+    }
+        bool IsDegenerate() const {
+        return pMin.x > pMax.x || pMin.y > pMax.y || pMin.z > pMax.z;
+    }
+
+    template <typename U>
+    explicit Bounds3(const Bounds3<U> &b) {
+        if (b.IsEmpty())
+            // Be careful about overflowing float->int conversions and the
+            // like.
+            *this = Bounds3<T>();
+        else {
+            pMin = Point3<T>(b.pMin);
+            pMax = Point3<T>(b.pMax);
+        }
+    }
+        bool operator==(const Bounds3<T> &b) const {
+        return b.pMin == pMin && b.pMax == pMax;
+    }
+        bool operator!=(const Bounds3<T> &b) const {
+        return b.pMin != pMin || b.pMax != pMax;
+    }
+        bool IntersectP(Point3f o, Vector3f d, Float tMax = Infinity, Float *hitt0 = nullptr,
+                    Float *hitt1 = nullptr) const;
+        bool IntersectP(Point3f o, Vector3f d, Float tMax, Vector3f invDir,
+                    const int dirIsNeg[3]) const;
+
+    std::string ToString() const { return StringPrintf("[ %s - %s ]", pMin, pMax); }
+
+    // Bounds3 Public Members
+    Point3<T> pMin, pMax;
+};
+
+
+using Bounds3f = Bounds3<Float>;
+using Bounds3i = Bounds3<int>;
+
+// Bounds3 Inline Functions
+template <typename T>
+inline Bounds3<T> Union(const Bounds3<T> &b, Point3<T> p) {
+    Bounds3<T> ret;
+    ret.pMin = Min(b.pMin, p);
+    ret.pMax = Max(b.pMax, p);
+    return ret;
 }
 
+template <typename T>
+inline Bounds3<T> Union(const Bounds3<T> &b1, const Bounds3<T> &b2) {
+    Bounds3<T> ret;
+    ret.pMin = Min(b1.pMin, b2.pMin);
+    ret.pMax = Max(b1.pMax, b2.pMax);
+    return ret;
+}
 
+template <typename T>
+inline Bounds3<T> Intersect(const Bounds3<T> &b1, const Bounds3<T> &b2) {
+    Bounds3<T> b;
+    b.pMin = Max(b1.pMin, b2.pMin);
+    b.pMax = Min(b1.pMax, b2.pMax);
+    return b;
+}
+
+template <typename T>
+inline bool Overlaps(const Bounds3<T> &b1, const Bounds3<T> &b2) {
+    bool x = (b1.pMax.x >= b2.pMin.x) && (b1.pMin.x <= b2.pMax.x);
+    bool y = (b1.pMax.y >= b2.pMin.y) && (b1.pMin.y <= b2.pMax.y);
+    bool z = (b1.pMax.z >= b2.pMin.z) && (b1.pMin.z <= b2.pMax.z);
+    return (x && y && z);
+}
+
+template <typename T>
+inline bool Inside(Point3<T> p, const Bounds3<T> &b) {
+    return (p.x >= b.pMin.x && p.x <= b.pMax.x && p.y >= b.pMin.y && p.y <= b.pMax.y &&
+            p.z >= b.pMin.z && p.z <= b.pMax.z);
+}
+
+template <typename T>
+inline bool InsideExclusive(Point3<T> p, const Bounds3<T> &b) {
+    return (p.x >= b.pMin.x && p.x < b.pMax.x && p.y >= b.pMin.y && p.y < b.pMax.y &&
+            p.z >= b.pMin.z && p.z < b.pMax.z);
+}
+
+template <typename T, typename U>
+inline auto DistanceSquared(Point3<T> p, const Bounds3<U> &b) {
+    using TDist = decltype(T{} - U{});
+    TDist dx = std::max<TDist>({0, b.pMin.x - p.x, p.x - b.pMax.x});
+    TDist dy = std::max<TDist>({0, b.pMin.y - p.y, p.y - b.pMax.y});
+    TDist dz = std::max<TDist>({0, b.pMin.z - p.z, p.z - b.pMax.z});
+    return Sqr(dx) + Sqr(dy) + Sqr(dz);
+}
+
+template <typename T, typename U>
+inline auto Distance(Point3<T> p, const Bounds3<U> &b) {
+    auto dist2 = DistanceSquared(p, b);
+    using TDist = typename TupleLength<decltype(dist2)>::type;
+    return std::sqrt(TDist(dist2));
+}
+
+template <typename T, typename U>
+inline Bounds3<T> Expand(const Bounds3<T> &b, U delta) {
+    Bounds3<T> ret;
+    ret.pMin = b.pMin - Vector3<T>(delta, delta, delta);
+    ret.pMax = b.pMax + Vector3<T>(delta, delta, delta);
+    return ret;
+}
+
+template <typename T>
+inline bool Bounds3<T>::IntersectP(Point3f o, Vector3f d, Float tMax,
+                                                Float *hitt0, Float *hitt1) const {
+    Float t0 = 0, t1 = tMax;
+    for (int i = 0; i < 3; ++i) {
+        // Update interval for _i_th bounding box slab
+        Float invRayDir = 1 / d[i];
+        Float tNear = (pMin[i] - o[i]) * invRayDir;
+        Float tFar = (pMax[i] - o[i]) * invRayDir;
+        // Update parametric interval from slab intersection $t$ values
+        if (tNear > tFar)
+            std::swap(tNear, tFar);
+        // Update _tFar_ to ensure robust ray--bounds intersection
+        tFar *= 1 + 2 * gamma(3);
+
+        t0 = tNear > t0 ? tNear : t0;
+        t1 = tFar < t1 ? tFar : t1;
+        if (t0 > t1)
+            return false;
+    }
+    if (hitt0)
+        *hitt0 = t0;
+    if (hitt1)
+        *hitt1 = t1;
+    return true;
+}
+
+template <typename T>
+inline bool Bounds3<T>::IntersectP(Point3f o, Vector3f d, Float raytMax,
+                                                Vector3f invDir,
+                                                const int dirIsNeg[3]) const {
+    const Bounds3f &bounds = *this;
+    // Check for ray intersection against $x$ and $y$ slabs
+    Float tMin = (bounds[dirIsNeg[0]].x - o.x) * invDir.x;
+    Float tMax = (bounds[1 - dirIsNeg[0]].x - o.x) * invDir.x;
+    Float tyMin = (bounds[dirIsNeg[1]].y - o.y) * invDir.y;
+    Float tyMax = (bounds[1 - dirIsNeg[1]].y - o.y) * invDir.y;
+    // Update _tMax_ and _tyMax_ to ensure robust bounds intersection
+    tMax *= 1 + 2 * gamma(3);
+    tyMax *= 1 + 2 * gamma(3);
+
+    if (tMin > tyMax || tyMin > tMax)
+        return false;
+    if (tyMin > tMin)
+        tMin = tyMin;
+    if (tyMax < tMax)
+        tMax = tyMax;
+
+    // Check for ray intersection against $z$ slab
+    Float tzMin = (bounds[dirIsNeg[2]].z - o.z) * invDir.z;
+    Float tzMax = (bounds[1 - dirIsNeg[2]].z - o.z) * invDir.z;
+    // Update _tzMax_ to ensure robust bounds intersection
+    tzMax *= 1 + 2 * gamma(3);
+
+    if (tMin > tzMax || tzMin > tMax)
+        return false;
+    if (tzMin > tMin)
+        tMin = tzMin;
+    if (tzMax < tMax)
+        tMax = tzMax;
+
+    return (tMin < raytMax) && (tMax > 0);
+}
+
+inline Bounds2iIterator begin(const Bounds2i &b) {
+    return Bounds2iIterator(b, b.pMin);
+}
+
+inline Bounds2iIterator end(const Bounds2i &b) {
+    // Normally, the ending point is at the minimum x value and one past
+    // the last valid y value.
+    Point2i pEnd(b.pMin.x, b.pMax.y);
+    // However, if the bounds are degenerate, override the end point to
+    // equal the start point so that any attempt to iterate over the bounds
+    // exits out immediately.
+    if (b.pMin.x >= b.pMax.x || b.pMin.y >= b.pMax.y)
+        pEnd = b.pMin;
+    return Bounds2iIterator(b, pEnd);
+}
+
+template <typename T>
+inline Bounds2<T> Union(const Bounds2<T> &b, Point2<T> p) {
+    // Be careful to not run the two-point Bounds constructor.
+    Bounds2<T> ret;
+    ret.pMin = Min(b.pMin, p);
+    ret.pMax = Max(b.pMax, p);
+    return ret;
+}
+}
