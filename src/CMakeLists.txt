@@ -18,6 +18,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 
 add_subdirectory(pbrt)
+add_subdirectory(ObjLoader)
 #add_subdirectory(pbrt/util)
 
 find_package(

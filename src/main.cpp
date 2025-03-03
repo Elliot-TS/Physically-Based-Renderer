@@ -7,9 +7,9 @@
 #include "pbrt/camera.h"
 #include "pbrt/integrator.h"
 #include "pbrt/util/display.h"
+#include "pbrt/util/buffercache.h"
 
 using namespace pbrt;
-
 
 // Based off RTW
 
@@ -38,6 +38,10 @@ int main(int argc, char *argv[]) {
     //} else return -1;
 
     // Ray tracing in a weekend
+
+    InitBufferCaches();
+    Triangle::Init();
+
     float aspectRatio = 1.32;
     int ny = 1556;
     int nx = aspectRatio*ny;
@@ -48,7 +52,14 @@ int main(int argc, char *argv[]) {
 
     UniformSampler *sampler = new UniformSampler();
 
-    Primitive *spheres[4] = { 
+    TriangleMesh mesh(
+            {Point3f(-2,0,0), Point3f(0,0,0),
+             Point3f(-2,2,0), Point3f(0,2,0)},
+            {2,1,0, 1,2,3});
+    auto triangles = Triangle::CreateTriangles(&mesh);
+
+    const int numShapes = 6;
+    Primitive *spheres[numShapes] = { 
         new GeometricPrimitive(
                 new Sphere(Point3f(0,0,-1), 0.5),
                 new Lambertian(Vector3f(0.8,0.3,0.3), sampler)),
@@ -60,9 +71,15 @@ int main(int argc, char *argv[]) {
                 new Metal(Vector3f(0.8, 0.6, 0.2), 1.0, sampler)),
         new GeometricPrimitive(
                 new Sphere(Point3f(-1,0,-1), 0.5),
-                new Metal(Vector3f(0.8,0.8,0.8), 0.3, sampler))
+                new Metal(Vector3f(0.8,0.8,0.8), 0.3, sampler)),
+        new GeometricPrimitive(
+                triangles[0].get(),
+                new Metal(Vector3f(0.8,0.8,0.8), 0.1, sampler)),
+        new GeometricPrimitive(
+                triangles[1].get(),
+                new Metal(Vector3f(0.8,0.8,0.8), 0.1, sampler))
     };
-    SimpleAggregate sphPrims(spheres, 4);
+    SimpleAggregate sphPrims(spheres, numShapes);
     ImageTileIntegrator intr(&cam, sampler, &sphPrims, {});
 
     film.display->Open();
@@ -83,4 +100,6 @@ int main(int argc, char *argv[]) {
     // Parse provided scene description files TODO
     // Render the scene TODO
     // Clean up after rendering the scene TODO
+    /*
+    */
 }

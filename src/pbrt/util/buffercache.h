@@ -4,6 +4,7 @@
 #include <cstring>
 #include <span>
 #include "pbrt/util/hash.h"
+#include "pbrt/math/vecmath.h"
 
 namespace pbrt {
 
@@ -16,42 +17,45 @@ namespace pbrt {
         public:
             BufferCache() {}
             ~BufferCache() {
-                for (int i = 0; i < nShards; i++) {
-                    for (auto iter = cache[nShards].begin(); iter != cache[nShards].end(); ++iter) {
-                        free(iter.ptr); 
+                for (const auto& shardSet: cache) {
+                    for (const Buffer& buffer: shardSet) {
+                        if (buffer.ptr != nullptr) delete[] buffer.ptr;
                     }
                 }
             }
             // Maybe FIXME: PBRT had Allocator element
-            const T *LookupOrAdd(std::span<const T> buf) 
+            const T* LookupOrAdd(std::span<const T> buf) 
             {
                 Buffer lookupBuffer(buf.data(), buf.size());
+
+                // Find which shard the lookupBuffer falls in
                 int shardIndex = uint32_t(lookupBuffer.hash) >> (32 - logShards);
 
                 // If the buffer exists in the cache, return it
                 mutex[shardIndex].lock_shared();
-                // if statement with initializer
-                if (auto iter = cache[shardIndex].find(lookupBuffer); iter != cache[shardIndex].end()) {
+                if (auto iter = cache[shardIndex].find(lookupBuffer); 
+                    iter != cache[shardIndex].end()) 
+                {
                     const T *ptr = iter->ptr;
                     mutex[shardIndex].unlock_shared();
                     return ptr;
                 }
+                mutex[shardIndex].unlock_shared();
 
                 // Otherwise, add it to the buffer
-                mutex[shardIndex].unlock_shared();
-                T *ptr = (T*) malloc(buf.size_bytes());
+                T *ptr = new T[buf.size()];
                 std::copy(buf.begin(), buf.end(), ptr);
 
                 // Exclusive lock while inserting into cache
                 mutex[shardIndex].lock();
 
                 // Handle the case of another thread adding the buffer first
-                if (auto iter = cache[shardIndex].find(lookupBuffer); iter != cache[shardIndex].end()) {
-                    const T *cachePtr = iter->ptr;
-                    mutex[shardIndex].unlock();
-                    free(ptr);
-                    return cachePtr;
-                }
+                //if (auto iter = cache[shardIndex].find(lookupBuffer); iter != cache[shardIndex].end()) {
+                    //const T *cachePtr = iter->ptr;
+                    //mutex[shardIndex].unlock();
+                    //delete[] ptr;
+                    //return cachePtr;
+                //}
 
                 // If no other thread added it, we add it
                 cache[shardIndex].insert(Buffer(ptr, buf.size()));
@@ -69,7 +73,7 @@ namespace pbrt {
                     hash = HashBuffer(ptr, size);
                 }
                 bool operator==(const Buffer &b) const {
-                    return size == b.size && hash = b.hash &&
+                    return size == b.size && hash == b.hash &&
                         std::memcmp(ptr, b.ptr, size * sizeof(T)) == 0;
                 }
             };
@@ -89,5 +93,7 @@ namespace pbrt {
             std::unordered_set<Buffer, BufferHasher> cache[nShards];
     };
 
-    extern BufferCache<int> *intBufferCache;
+    void InitBufferCaches();
+    extern BufferCache<unsigned int> *uintBufferCache;
+    extern BufferCache<Point3f> *point3BufferCache;
 }

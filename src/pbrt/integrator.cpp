@@ -70,7 +70,7 @@ namespace pbrt {
                                 Float v = Float(y + sampler->sample()) / Float(hei);
 
                                 Ray r = camera->get_ray(u, v);
-                                col += color(r, *aggregate, 4);
+                                col += color(r, *aggregate, 6);
                             }
                             col /= samples;
 
