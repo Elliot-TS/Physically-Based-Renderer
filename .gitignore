@@ -7,3 +7,5 @@ Makefile
 CMakeFiles/
 CMakeCache.txt
 todo.md
+*.mtl
+*.obj

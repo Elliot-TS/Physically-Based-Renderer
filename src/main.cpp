@@ -8,6 +8,7 @@
 #include "pbrt/integrator.h"
 #include "pbrt/util/display.h"
 #include "pbrt/util/buffercache.h"
+#include "ObjLoader/OBJ_Loader.h"
 
 using namespace pbrt;
 
@@ -52,17 +53,35 @@ int main(int argc, char *argv[]) {
 
     UniformSampler *sampler = new UniformSampler();
 
-    TriangleMesh mesh(
-            {Point3f(-2,0,0), Point3f(0,0,0),
-             Point3f(-2,2,0), Point3f(0,2,0)},
-            {2,1,0, 1,2,3});
-    auto triangles = Triangle::CreateTriangles(&mesh);
+    objl::Loader Loader;
+    bool loadout = Loader.LoadFile("test.obj");
+    if (!loadout) return 1;
 
-    const int numShapes = 6;
-    Primitive *spheres[numShapes] = { 
-        new GeometricPrimitive(
-                new Sphere(Point3f(0,0,-1), 0.5),
-                new Lambertian(Vector3f(0.8,0.3,0.3), sampler)),
+    // Go through each loaded mesh
+    std::vector<TriangleMesh> triMeshes;
+    std::vector<std::unique_ptr<Shape>> triangles;
+    for (int i = 0; i < Loader.LoadedMeshes.size(); ++i) {
+        objl::Mesh loadedMesh = Loader.LoadedMeshes[i];
+
+        // Vertices
+        std::vector<Point3f> vertices;
+        for (int j = 0; j < loadedMesh.Vertices.size(); ++j) {
+            vertices.push_back(Point3f(
+                        loadedMesh.Vertices[j].Position.X,
+                        loadedMesh.Vertices[j].Position.Y,
+                        loadedMesh.Vertices[j].Position.Z));
+        }
+
+        // Triangle Mesh
+        triMeshes.push_back(TriangleMesh(
+                    vertices,
+                    loadedMesh.Indices));
+        auto newTriangles = Triangle::CreateTriangles(&triMeshes.back());
+        std::move(newTriangles.begin(), newTriangles.end(),
+                std::back_inserter(triangles));
+    }
+
+    std::vector<Primitive*> primitives = { 
         new GeometricPrimitive(
                 new Sphere(Point3f(0, -100.5, -1), 100),
                 new Lambertian(Vector3f(0.34,0.58,0.47), sampler)),
@@ -72,15 +91,17 @@ int main(int argc, char *argv[]) {
         new GeometricPrimitive(
                 new Sphere(Point3f(-1,0,-1), 0.5),
                 new Metal(Vector3f(0.8,0.8,0.8), 0.3, sampler)),
-        new GeometricPrimitive(
-                triangles[0].get(),
-                new Metal(Vector3f(0.8,0.8,0.8), 0.1, sampler)),
-        new GeometricPrimitive(
-                triangles[1].get(),
-                new Metal(Vector3f(0.8,0.8,0.8), 0.1, sampler))
     };
-    SimpleAggregate sphPrims(spheres, numShapes);
-    ImageTileIntegrator intr(&cam, sampler, &sphPrims, {});
+    int numShapes = 3;
+    for (int i = 0; i < triangles.size(); ++i) {
+        primitives.push_back(new GeometricPrimitive(
+            triangles[i].get(), 
+            new Metal(Vector3f(0.8,0.8,0.8), 0.3, sampler)));
+        numShapes++;
+    }
+
+    SimpleAggregate aggregate(&primitives[0], numShapes);
+    ImageTileIntegrator intr(&cam, sampler, &aggregate, {});
 
     film.display->Open();
     auto t1 = high_resolution_clock::now();
