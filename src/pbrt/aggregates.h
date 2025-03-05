@@ -10,6 +10,7 @@ namespace pbrt {
 
         BVHPrimitive(size_t primitiveIndex, const Bounds3f &bounds)
             : primitiveIndex(primitiveIndex), bounds(bounds) {}
+        BVHPrimitive() = default;
 
         Point3f Centroid() const { return .5f * bounds.pMin + 0.5f * bounds.pMax; }
     };
@@ -31,8 +32,20 @@ namespace pbrt {
         BVHBuildNode *children[2];
         int splitAxis, firstPrimOffset, nPrimitives;
     };
+    struct alignas(32) LinearBVHNode {
+        Bounds3f bounds;
+        union {
+            int primitivesOffset; // leaf
+            int secondChildOffset; // interior
+        };
+        uint16_t nPrimitives;
+        uint8_t axis;
+    };
+
+
     class SimpleAggregate : public Primitive {
         public:
+            // TODO: Change to vector, for consistency with BVHAggregate
             Primitive **primitives; // List of pointers to primitives
             int numPrimitives;
 
@@ -55,6 +68,7 @@ namespace pbrt {
             }
     };
 
+
     class BVHAggregate: public Primitive {
         public:
             // Algorithms for partitioning primitives
@@ -64,6 +78,7 @@ namespace pbrt {
             int maxPrimsInNode;
             std::vector<Primitive*> primitives;
             SplitMethod splitMethod;
+            LinearBVHNode *nodes = nullptr;
 
             BVHAggregate
                 ( std::vector<Primitive*> primitives,
@@ -75,6 +90,17 @@ namespace pbrt {
                     std::atomic<int> *totalNodes,
                     std::atomic<int> *orderedPrimsOffset,
                     std::vector<Primitive*> &orderedPrims);
+
+            int flattenBVH(BVHBuildNode *node, int *offset);
+            
+            Bounds3f Bounds() const {
+                return nodes[0].bounds;
+            }
+
+            std::optional<ShapeIntersection> Intersect
+                (const Ray &ray, Float tMax) const;
+            bool IntersectP
+                (const Ray &ray, Float tMax) const;
     };
 
 }

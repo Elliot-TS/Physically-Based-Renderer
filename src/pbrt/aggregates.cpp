@@ -70,6 +70,11 @@ namespace pbrt {
         primitives.swap(orderedPrims);
 
         // Convert BHV into compact representation in nodes array
+        bvhPrimitives.resize(0); // Free the memory
+        bvhPrimitives.shrink_to_fit();
+        nodes = new LinearBVHNode[totalNodes];
+        int offset = 0;
+        flattenBVH(root, &offset);
     }
 
 
@@ -120,6 +125,7 @@ namespace pbrt {
                 int mid = bvhPrimitives.size() / 2;
 
                 // TODO: Partition primitives based on splitMethod
+                bool breakLoop = false;
                 switch (splitMethod) {
                     case SplitMethod::Middle: {
                         Float pmid = (centroidBounds.pMin[dim] + centroidBounds.pMax[dim]) / 2;
@@ -133,8 +139,20 @@ namespace pbrt {
                         mid = midIter - bvhPrimitives.begin();
                         if (midIter != bvhPrimitives.begin() &&
                             midIter != bvhPrimitives.end()) 
-                        { break; }
+                            break;
                     }
+                    // TODO: Redo this because you copied and pasted
+                    case SplitMethod::EqualCounts: {
+                       // Partition primitives into equally sized subsets
+                       mid = bvhPrimitives.size() / 2;
+                       std::nth_element(bvhPrimitives.begin(), bvhPrimitives.begin() + mid,
+                               bvhPrimitives.end(),
+                               [dim](const BVHPrimitive &a, const BVHPrimitive &b) {
+                               return a.Centroid()[dim] < b.Centroid()[dim];
+                               });
+
+                       break;
+                   }
                     default:
                         ERROR("The BVH Split Method is not implemented.");
                 }
@@ -153,5 +171,86 @@ namespace pbrt {
         }
 
         return node;
+    }
+    
+    int BVHAggregate::flattenBVH(BVHBuildNode *node, int *offset) {
+        LinearBVHNode *linearNode = &nodes[*offset];
+        linearNode->bounds = node->bounds;
+        int nodeOffset = (*offset)++;
+        if (node->nPrimitives > 0) {
+            // Create leaf node
+            linearNode->primitivesOffset = node->firstPrimOffset;
+            linearNode->nPrimitives = node->nPrimitives;
+        }
+        else {
+            // Recursively create interior flattened BVH node
+            linearNode->axis = node->splitAxis;
+            linearNode->nPrimitives = 0;
+            flattenBVH(node->children[0], offset);
+            linearNode->secondChildOffset = flattenBVH(node->children[1], offset);
+        }
+        return nodeOffset;
+    }
+
+    
+    std::optional<ShapeIntersection> BVHAggregate::Intersect
+        (const Ray &ray, Float tMax) const
+    {
+        std::optional<ShapeIntersection> si;
+        Vector3f invDir(
+                1/ray.direction.x, 
+                1/ray.direction.y,
+                1/ray.direction.z);
+        int dirIsNeg[3] = {
+            int(invDir.x < 0),
+            int(invDir.y < 0),
+            int(invDir.z < 0)
+        };
+
+        // Follow ray through BVH nodes to find primitive intersections
+        int toVisitOffset = 0, currentNodeIndex = 0;
+        int nodesToVisit[64];
+        while (true) {
+            const LinearBVHNode *node = &nodes[currentNodeIndex];
+            // Check ray against BVH node
+            if (node->bounds.IntersectP(
+                    ray.origin, ray.direction, 
+                    tMax, invDir, dirIsNeg))
+            {
+                // Intersect ray with primitivs in leaf BVH node
+                for (int i = 0; i < node->nPrimitives; ++i) {
+                    std::optional<ShapeIntersection> primSi =
+                        primitives[node->primitivesOffset + i]
+                        ->Intersect(ray, tMax);
+                    if (primSi) {
+                        si = primSi;
+                        tMax = si->tHit;
+                    }
+                }
+                if (toVisitOffset == 0) break;
+                currentNodeIndex = nodesToVisit[--toVisitOffset];
+            }
+            else {
+                // Put far BVH node on nodesToVisit stack, advance to near node
+                if (dirIsNeg[node->axis]) {
+                    nodesToVisit[toVisitOffset++] = currentNodeIndex + 1;
+                    currentNodeIndex = node->secondChildOffset;
+                }
+                else {
+                    nodesToVisit[toVisitOffset++] = node->secondChildOffset;
+                    ++currentNodeIndex;
+                }
+            }
+        }
+
+        return si;
+    }
+
+    // TODO: instead of calling Intersect, copy code and return
+    // early if any intersection is found
+    bool BVHAggregate::IntersectP
+        (const Ray &ray, Float tMax) const
+    {
+        return bool(IntersectP(ray, tMax));
     }
 }

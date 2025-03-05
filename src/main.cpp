@@ -101,7 +101,8 @@ int main(int argc, char *argv[]) {
         numShapes++;
     }
 
-    SimpleAggregate aggregate(&primitives[0], numShapes);
+    BVHAggregate aggregate(primitives, numShapes, 
+            BVHAggregate::SplitMethod::EqualCounts);
     ImageTileIntegrator intr(&cam, sampler, &aggregate, {});
 
     film.display->Open();
