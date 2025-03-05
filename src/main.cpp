@@ -4,6 +4,7 @@
 #include "pbrt/ray.h"
 #include "pbrt/shapes.h"
 #include "pbrt/primitive.h"
+#include "pbrt/aggregates.h"
 #include "pbrt/camera.h"
 #include "pbrt/integrator.h"
 #include "pbrt/util/display.h"

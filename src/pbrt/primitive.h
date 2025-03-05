@@ -14,6 +14,8 @@ namespace pbrt {
             virtual bool IntersectP
                 (const Ray &ray, Float tMax = Infinity) const = 0;
 
+            virtual Bounds3f Bounds() const = 0;
+
             // Public Members
             Material *material;
             // Light areaLight;
@@ -38,21 +40,8 @@ namespace pbrt {
             bool IntersectP (const Ray &ray, Float tMax) const {
                 return shape->IntersectP(ray, tMax);
             }
-    };
-
-    class SimpleAggregate : public Primitive {
-        public:
-            Primitive **primitives; // List of pointers to primitives
-            int numPrimitives;
-
-            SimpleAggregate
-                (Primitive **primitives, int numPrimitives):
-                    primitives(primitives),
-                    numPrimitives(numPrimitives) {}
-
-            std::optional<ShapeIntersection> Intersect
-                (const Ray &ray, Float tMax = Infinity) const;
-            bool IntersectP
-                (const Ray &ray, Float tMax = Infinity) const;
+            Bounds3f Bounds() const {
+                return shape->Bounds();
+            }
     };
 }

@@ -1,7 +1,7 @@
 add_subdirectory(util)
 add_library(pbrt
     shapes.cpp
-    primitive.cpp
+    aggregates.cpp
     integrator.cpp
     util/parallel.cpp
     util/buffercache.cpp
