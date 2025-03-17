@@ -78,6 +78,15 @@ class BVHAggregate : public Primitive {
  private:
   std::vector<BVHBuildNode *> nodesToFree;
 
+  void buildLeafNode(
+      std::span<BVHPrimitive> &bvhPrimitives,
+      std::atomic<int> *totalNodes,
+      std::atomic<int> *orderedPrimsOffset,
+      std::vector<Primitive *> &orderedPrims,
+      Bounds3f bounds,
+      BVHBuildNode *node
+  );
+
  public:
   // Algorithms for partitioning primitives
   enum class SplitMethod { SAH, HLBVH, Middle, EqualCounts };
