@@ -41,10 +41,6 @@ BVHAggregate::BVHAggregate(
       splitMethod(splitMethod)
 {
   const int ps = 51;
-  if (primitives.size() != ps)
-    std::cout << "A. primitives.size() = " << primitives.size()
-              << std::endl;
-
 
   // Initialize bvhPrimitives array for primitives
   std::vector<BVHPrimitive> bvhPrimitives;
@@ -53,10 +49,6 @@ BVHAggregate::BVHAggregate(
         BVHPrimitive(i, primitives[i]->Bounds())
     );
   }
-
-  if (bvhPrimitives.size() != ps)
-    std::cout << "A. bvhPrimitives.size() = "
-              << bvhPrimitives.size() << std::endl;
 
   // Build BVH for primitives using bvhPrimitives
   std::vector<Primitive *> orderedPrims;
@@ -76,20 +68,12 @@ BVHAggregate::BVHAggregate(
     );
   }
 
-  if (orderedPrims.size() != ps)
-    std::cout << "A. orderedPrims.size() = "
-              << orderedPrims.size() << std::endl;
   primitives.swap(orderedPrims);
-  if (primitives.size() != ps)
-    std::cout << "A. primitives.size() = " << primitives.size()
-              << std::endl;
 
   // Convert BVH into compact representation in node array
   // bvhPrimitives.resize(0);  // free memory from bvhPrimitives
   // bvhPrimitives.shrink_to_fit();
   nodes = new LinearBVHNode[totalNodes];
-  LinearBVHNode *a = &nodes[0];
-  LinearBVHNode *b = &nodes[1];
   int offset = 0;
   flattenBVH(root, &offset);
 
@@ -103,7 +87,9 @@ BVHBuildNode *BVHAggregate::buildRecursive(
     std::vector<Primitive *> &orderedPrims
 )
 {
+  // Create a node to add
   BVHBuildNode *node = new BVHBuildNode;
+  ++*totalNodes;
 
   // Put everything into one leaf node
 
@@ -148,16 +134,65 @@ std::optional<ShapeIntersection> BVHAggregate::Intersect(
     const Ray &ray, Float tMax
 ) const
 {
-  Float closest = tMax;
-  std::optional<ShapeIntersection> hit;
-  for (int i = 0; i < primitives.size(); i++) {
-    auto si = primitives[i]->Intersect(ray, closest);
-    if (bool(si)) {
-      hit = si;
-      closest = si->tHit;
+  std::optional<ShapeIntersection> si;
+  Vector3f invDir(
+      1 / ray.direction.x,
+      1 / ray.direction.y,
+      1 / ray.direction.z
+  );
+  int dirIsNeg[3] = {
+      int(invDir.x < 0), int(invDir.y < 0), int(invDir.z < 0)
+  };
+
+  // Follow the ray through BVH nodes to find intersections
+  int toVisitOffset = 0, currentNodeIndex = 0;
+  int nodesToVisit[64];  // stack of nodes to visit
+  while (true) {
+    const LinearBVHNode *node = &nodes[currentNodeIndex];
+    // If we intersect the current bounding box
+    if (node->bounds.IntersectP(
+            ray.origin, ray.direction, tMax, invDir, dirIsNeg
+        ))
+    {
+      // Leaf Node
+      if (node->nPrimitives > 0) {
+        // Intersect ray with primitives in leaf node
+        for (int i = 0; i < node->nPrimitives; ++i) {
+          std::optional<ShapeIntersection> primSi =
+              primitives[node->primitivesOffset + i]->Intersect(
+                  ray, tMax
+              );
+          if (primSi) {
+            si = primSi;
+            tMax = si->tHit;
+          }
+        }
+
+        // Continue visiting remaining nodes
+        if (toVisitOffset == 0) break;
+        currentNodeIndex = nodesToVisit[--toVisitOffset];
+      }
+      // Interior Node
+      else {
+        // Decide whether to visit first or second child first
+        if (dirIsNeg[node->axis]) {  // second child first
+          nodesToVisit[toVisitOffset++] = currentNodeIndex + 1;
+          currentNodeIndex = node->secondChildOffset;
+        }
+        else {  // first child first
+          nodesToVisit[toVisitOffset++] =
+              node->secondChildOffset;
+          ++currentNodeIndex;
+        }
+      }
+    }
+    else {
+      if (toVisitOffset == 0) break;
+      currentNodeIndex = nodesToVisit[--toVisitOffset];
     }
   }
-  return hit;
+
+  return si;
 }
 bool BVHAggregate::IntersectP(const Ray &ray, Float tMax) const
 {
