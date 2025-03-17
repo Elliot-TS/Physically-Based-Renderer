@@ -97,27 +97,27 @@ int main(int argc, char *argv[])
   }
 
   std::vector<Primitive *> primitives = {
-      new GeometricPrimitive(
-          new Sphere(Point3f(0, -100.5, -1), 100),
-          new Lambertian(Vector3f(0.34, 0.58, 0.47), sampler)
-      ),
-      new GeometricPrimitive(
-          new Sphere(Point3f(1, 0, -1), 0.5),
-          new Metal(Vector3f(0.8, 0.6, 0.2), 1.0, sampler)
-      ),
+      // new GeometricPrimitive(
+      // new Sphere(Point3f(0, -100.5, -1), 100),
+      // new Lambertian(Vector3f(0.34, 0.58, 0.47), sampler)
+      //),
+      // new GeometricPrimitive(
+      // new Sphere(Point3f(1, 0, -1), 0.5),
+      // new Metal(Vector3f(0.8, 0.6, 0.2), 1.0, sampler)
+      //),
       new GeometricPrimitive(
           new Sphere(Point3f(-1, 0, -1), 0.5),
           new Metal(Vector3f(0.8, 0.8, 0.8), 0.3, sampler)
       ),
   };
-  int numShapes = 3;
-  for (int i = 0; i < triangles.size(); ++i) {
-    primitives.push_back(new GeometricPrimitive(
-        triangles[i].get(),
-        new Metal(Vector3f(0.8, 0.8, 0.8), 0.3, sampler)
-    ));
-    numShapes++;
-  }
+  int numShapes = 1;
+  // for (int i = 0; i < triangles.size(); ++i) {
+  // primitives.push_back(new GeometricPrimitive(
+  // triangles[i].get(),
+  // new Metal(Vector3f(0.8, 0.8, 0.8), 0.3, sampler)
+  //));
+  // numShapes++;
+  //}
 
   BVHAggregate aggregate(
       primitives, numShapes,

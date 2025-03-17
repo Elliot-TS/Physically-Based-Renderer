@@ -51,7 +51,7 @@ BVHAggregate::BVHAggregate(
   }
 
   // Build BVH for primitives using bvhPrimitives
-  std::vector<Primitive *> orderedPrims;
+  std::vector<Primitive *> orderedPrims(primitives.size());
   BVHBuildNode *root;
 
   std::atomic<int> totalNodes {0};
@@ -80,6 +80,24 @@ BVHAggregate::BVHAggregate(
   // TODO: Free BVHBuildNodes
 }
 
+void BVHAggregate::buildLeafNode(
+    std::span<BVHPrimitive> &bvhPrimitives,
+    std::atomic<int> *totalNodes,
+    std::atomic<int> *orderedPrimsOffset,
+    std::vector<Primitive *> &orderedPrims,
+    Bounds3f bounds,
+    BVHBuildNode *node
+)
+{
+  int firstPrimOffset =
+      orderedPrimsOffset->fetch_add(bvhPrimitives.size());
+  for (size_t i = 0; i < bvhPrimitives.size(); ++i) {
+    int index = bvhPrimitives[i].primitiveIndex;
+    orderedPrims[firstPrimOffset + i] = primitives[index];
+  }
+  node->InitLeaf(firstPrimOffset, bvhPrimitives.size(), bounds);
+}
+
 BVHBuildNode *BVHAggregate::buildRecursive(
     std::span<BVHPrimitive> bvhPrimitives,
     std::atomic<int> *totalNodes,
@@ -89,10 +107,101 @@ BVHBuildNode *BVHAggregate::buildRecursive(
 {
   // Create a node to add
   BVHBuildNode *node = new BVHBuildNode;
+  nodesToFree.push_back(node);
   ++*totalNodes;
 
-  // Put everything into one leaf node
+  // Compute bounds for all primitives
+  Bounds3f bounds;
+  for (const BVHPrimitive &prim : bvhPrimitives) {
+    bounds = Union(bounds, prim.bounds);
+  }
 
+  // Create a leaf node
+  if (bounds.SurfaceArea() == 0 || bvhPrimitives.size() == 1) {
+    buildLeafNode(
+        bvhPrimitives, totalNodes, orderedPrimsOffset,
+        orderedPrims, bounds, node
+    );
+    return node;
+  }
+  // Recursively create interior nodes
+  else {
+    // Compute bound of primitive centroids
+    // and choose split dimension
+    Bounds3f centroidBounds;
+    for (const auto &prim : bvhPrimitives)
+      centroidBounds = Union(centroidBounds, prim.Centroid());
+    int dim = centroidBounds.MaxDimension();
+
+    // If all the centroids occupy the same location,
+    // create a leaf node
+    if (centroidBounds.pMax[dim] == centroidBounds.pMin[dim]) {
+      buildLeafNode(
+          bvhPrimitives, totalNodes, orderedPrimsOffset,
+          orderedPrims, bounds, node
+      );
+      return node;
+    }
+    // Partition primitives into two sets and build children
+    else {
+      int mid = bvhPrimitives.size() / 2;
+      // Partition primitives based on splitMethod
+      switch (splitMethod) {
+        case SplitMethod::Middle: {
+          Float pmid = (centroidBounds.pMin[dim] +
+                        centroidBounds.pMax[dim]) /
+                       2;
+          auto midIter = std::partition(
+              bvhPrimitives.begin(), bvhPrimitives.end(),
+              [dim, pmid](const BVHPrimitive &pi) {
+                return pi.Centroid()[dim] < pmid;
+              }
+          );
+          mid = midIter - bvhPrimitives.begin();
+          if (midIter != bvhPrimitives.begin() &&
+              midIter != bvhPrimitives.end())
+            break;
+        }
+        // TODO: Redo this because you copied and pasted
+        case SplitMethod::EqualCounts: {
+          // Partition primitives into equally sized subsets
+          mid = bvhPrimitives.size() / 2;
+          std::nth_element(
+              bvhPrimitives.begin(),
+              bvhPrimitives.begin() + mid, bvhPrimitives.end(),
+              [dim](
+                  const BVHPrimitive &a, const BVHPrimitive &b
+              ) {
+                return a.Centroid()[dim] < b.Centroid()[dim];
+              }
+          );
+
+          break;
+        }
+        default:
+          ERROR("The BVH Split Method is not implemented.");
+      }
+
+      // Recursively build BVHs for children
+      // TODO: Make paralell if bvhPrimitives.size() > 128*1024
+      BVHBuildNode *children[2];
+      children[0] = buildRecursive(
+          bvhPrimitives.subspan(0, mid), totalNodes,
+          orderedPrimsOffset, orderedPrims
+      );
+      children[1] = buildRecursive(
+          bvhPrimitives.subspan(mid), totalNodes,
+          orderedPrimsOffset, orderedPrims
+      );
+
+      // Create the interior node
+      node->InitInterior(dim, children[0], children[1]);
+      return node;
+    }
+  }
+
+  // Put everything into one leaf node
+  /*
   Bounds3f bounds;
   for (auto prim : bvhPrimitives) {
     bounds = Union(bounds, prim.bounds);
@@ -105,6 +214,7 @@ BVHBuildNode *BVHAggregate::buildRecursive(
 
   nodesToFree.push_back(node);
   return node;
+  */
 }
 
 int BVHAggregate::flattenBVH(BVHBuildNode *node, int *offset)
