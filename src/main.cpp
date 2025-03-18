@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
   UniformSampler *sampler = new UniformSampler();
 
   objl::Loader Loader;
-  bool loadout = Loader.LoadFile("test.obj");
+  bool loadout = Loader.LoadFile("test2.obj");
   if (!loadout) return 1;
 
   // Go through each loaded mesh
@@ -97,32 +97,33 @@ int main(int argc, char *argv[])
   }
 
   std::vector<Primitive *> primitives = {
-      // new GeometricPrimitive(
-      // new Sphere(Point3f(0, -100.5, -1), 100),
-      // new Lambertian(Vector3f(0.34, 0.58, 0.47), sampler)
-      //),
-      // new GeometricPrimitive(
-      // new Sphere(Point3f(1, 0, -1), 0.5),
-      // new Metal(Vector3f(0.8, 0.6, 0.2), 1.0, sampler)
-      //),
+      new GeometricPrimitive(
+          new Sphere(Point3f(0, -100.5, -1), 100),
+          new Lambertian(Vector3f(0.34, 0.58, 0.47), sampler)
+      ),
+      new GeometricPrimitive(
+          new Sphere(Point3f(1, 0, -1), 0.5),
+          new Metal(Vector3f(0.8, 0.6, 0.2), 1.0, sampler)
+      ),
       new GeometricPrimitive(
           new Sphere(Point3f(-1, 0, -1), 0.5),
           new Metal(Vector3f(0.8, 0.8, 0.8), 0.3, sampler)
       ),
   };
-  int numShapes = 1;
-  // for (int i = 0; i < triangles.size(); ++i) {
-  // primitives.push_back(new GeometricPrimitive(
-  // triangles[i].get(),
-  // new Metal(Vector3f(0.8, 0.8, 0.8), 0.3, sampler)
-  //));
-  // numShapes++;
-  //}
+  int numShapes = 3;
+  for (int i = 0; i < triangles.size(); ++i) {
+    primitives.push_back(new GeometricPrimitive(
+        triangles[i].get(),
+        new Metal(Vector3f(0.8, 0.8, 0.8), 0.3, sampler)
+    ));
+    numShapes++;
+  }
 
   BVHAggregate aggregate(
-      primitives, numShapes,
-      BVHAggregate::SplitMethod::EqualCounts
+      primitives, numShapes, BVHAggregate::SplitMethod::Middle
   );
+  // SimpleAggregate aggregate(&primitives[0], numShapes);
+
   ImageTileIntegrator intr(&cam, sampler, &aggregate, {});
 
   film.display->Open();

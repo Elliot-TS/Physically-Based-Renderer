@@ -87,6 +87,14 @@ class BVHAggregate : public Primitive {
       BVHBuildNode *node
   );
 
+  bool partitionMiddle(
+      std::span<BVHPrimitive> &bvhPrimitives,
+      Bounds3f centroidBounds, int dim, int *mid
+  );
+  void partitionEqualCounts(
+      std::span<BVHPrimitive> &bvhPrimitives, int dim, int *mid
+  );
+
  public:
   // Algorithms for partitioning primitives
   enum class SplitMethod { SAH, HLBVH, Middle, EqualCounts };
@@ -118,15 +126,7 @@ class BVHAggregate : public Primitive {
 
   int flattenBVH(BVHBuildNode *node, int *offset);
 
-  // Bounds3f Bounds() const { return nodes[0].bounds; }
-  Bounds3f Bounds() const
-  {
-    Bounds3f totalBounds;
-    for (int i = 0; i < primitives.size(); ++i) {
-      totalBounds = Union(totalBounds, primitives[i]->Bounds());
-    }
-    return totalBounds;
-  }
+  Bounds3f Bounds() const { return nodes[0].bounds; }
 
   std::optional<ShapeIntersection> Intersect(
       const Ray &ray, Float tMax
