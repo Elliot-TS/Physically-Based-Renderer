@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
   for (int i = 0; i < triangles.size(); ++i) {
     primitives.push_back(new GeometricPrimitive(
         triangles[i].get(),
-        new Metal(Vector3f(0.8, 0.8, 0.8), 0.3, sampler)
+        new Metal(Vector3f(0.8, 0.1, 0.2), 0.3, sampler)
     ));
     numShapes++;
   }
