@@ -17,7 +17,7 @@ A physically based path tracer based off the renderer described [Physically Base
 
 ## Screenshots
 Two spherers and a hex-torus triangle mesh.  No BVH.  Took 16 minutes to render 64 samples per pixel
-![Two spheres and a hex-torus](Screenshots/Two%20spheres,%20hex-torus,%20no%20BVH%206%20min.png)
+![Two spheres and a hex-torus](Screenshots/Two%20spheres,%20hex-torus,%20no%20BVH%2016%20min.png)
 
 Scene with a complex triangle mesh of a monkey head.  BVH with Middle partition trategy.
 ![Suzanne](Screenshots/Suzanne.png)
