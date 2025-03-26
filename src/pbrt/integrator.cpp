@@ -22,7 +22,6 @@ Vector3f color(
     else
       return Vector3f(0, 0, 0);
   }
-
   Vector3f unit_direction = Normalize(r.direction);
   Float t = 0.5 * (unit_direction.y + 1.0);
   return (1.0 - t) * Vector3f(0.88, 0.96, 0.96) +
@@ -58,23 +57,29 @@ void ImageTileIntegrator::Render()
 
   Sampler *sampler =
       samplerPrototype;  // We're going to use a ScratchBuffer
-                         // later, that's why we're making this
-                         // alias
+                         // later, that's why we're making
+                         // this alias
+
+  int spp = 16;  // Samples per pixel should be part of sampler
 
   int wid = camera->film->display->width;
   int hei = camera->film->display->height;
 
-  // TODO: Render in waves
+  // Divide the rendering among a number of threads
   ParallelFor2D(
       wid, hei,
       [&](const unsigned int startIndex,
           const unsigned int endIndex,
           const uint8_t threadID) {
-        int samples = 1;
-        while (samples <= 64 && camera->film->display->isOpen) {
+        // Render the image in waves
+        int waveSampleStart = 0;
+        int waveSampleEnd = 1;
+        while (waveSampleStart < spp &&
+               camera->film->display->isOpen)
+        {
+          // Each thread goes through its assigned pixels
           unsigned int x = startIndex % wid;
           unsigned int y = startIndex / wid;
-          // while (camera->film->display->isOpen) {
           for (int i = startIndex; i < endIndex; i++) {
             x++;
             if (x >= wid) {
@@ -84,9 +89,11 @@ void ImageTileIntegrator::Render()
 
             Vector3f col(0, 0, 0);
 
-            for (unsigned int sample = 0; sample < samples;
-                 sample++)
-            {
+            // Compute the samples for each pixel for each
+            // wave
+            unsigned int sample = waveSampleStart;
+            for (; sample < std::min(waveSampleEnd, spp);
+                 ++sample) {
               Float u =
                   Float(x + sampler->sample()) / Float(wid);
               Float v =
@@ -95,23 +102,26 @@ void ImageTileIntegrator::Render()
               Ray r = camera->get_ray(u, v);
               col += color(r, *aggregate, 6);
             }
-            col /= samples;
+            col /= sample - waveSampleStart;
 
             col = Vector3f(
                 std::sqrt(col.x),
                 std::sqrt(col.y),
                 std::sqrt(col.z)
             );
+
             camera->film->AddSample(
-                col, x, y, samples - 1, samples
+                col, x, y, waveSampleStart,
+                sample - waveSampleStart
             );
 
             if (!camera->film->display->isOpen) break;
-          }
+          }  // End pixel for loop
           if (!camera->film->display->isOpen) break;
-          samples *= 2;
-        }
-      }
+          waveSampleStart = waveSampleEnd;
+          waveSampleEnd = std::min(waveSampleEnd * 2, spp);
+        }  // End waves while loop
+      }  // End ParallelFor2D
   );
 }
 /*void ImageTileIntegrator::Render() {
@@ -126,11 +136,11 @@ ScratchBuffer later, that's why we're making this alias
 
 // Render image in waves
 int samplesPerPixel = 256;
-int waveStart = 0, waveEnd = samplesPerPixel, nextWaveSize = 1;
-while (waveStart < samplesPerPixel)
+int waveStart = 0, waveEnd = samplesPerPixel, nextWaveSize =
+1; while (waveStart < samplesPerPixel)
 {
 // Render current wave's image tiles in parallel
-// TODO: Use mutli-threading via ParallelFor2D() function.  For
+// TODO: Use mutli-threading via ParallelFor2D() function. For
 now, assume there is just one tile.
 
 for (int y = 0; y < ny; ++y) {

@@ -1,5 +1,5 @@
+#include <nanobench.h>
 #include <iostream>
-// #include <sstream> // For command-line arguments
 #include "ObjLoader/OBJ_Loader.h"
 #include "pbrt/aggregates.h"
 #include "pbrt/camera.h"
@@ -8,6 +8,7 @@
 #include "pbrt/ray.h"
 #include "pbrt/samplers.h"
 #include "pbrt/shapes.h"
+#include "pbrt/util/benchmark.h"
 #include "pbrt/util/buffercache.h"
 #include "pbrt/util/display.h"
 
@@ -36,10 +37,6 @@ Float hit_sphere(
 // Based off RTW and PBRT
 int main(int argc, char *argv[])
 {
-  using std::chrono::duration;
-  using std::chrono::duration_cast;
-  using std::chrono::high_resolution_clock;
-  using std::chrono::milliseconds;
   // How to Read command line arguments
   // if (argc >= 2) {
   // std::istringstream iss( argv[1] );
@@ -47,6 +44,8 @@ int main(int argc, char *argv[])
   //} else return -1;
 
   // Ray tracing in a weekend
+
+  Benchmark bm;
 
   InitBufferCaches();
   Triangle::Init();
@@ -64,6 +63,7 @@ int main(int argc, char *argv[])
 
   UniformSampler *sampler = new UniformSampler();
 
+  bm.Start();
   objl::Loader Loader;
   bool loadout = Loader.LoadFile("test2.obj");
   if (!loadout) return 1;
@@ -118,21 +118,23 @@ int main(int argc, char *argv[])
     ));
     numShapes++;
   }
+  std::cout << "Created Meshes: " << bm.GetTime() << " ms \n";
 
+  bm.Start();
   BVHAggregate aggregate(
       primitives, numShapes, BVHAggregate::SplitMethod::Middle
   );
   // SimpleAggregate aggregate(&primitives[0], numShapes);
+  std::cout << "Create aggregate: " << bm.GetTime() << " ms\n";
 
   ImageTileIntegrator intr(&cam, sampler, &aggregate, {});
 
   film.display->Open();
-  auto t1 = high_resolution_clock::now();
+
+  bm.Start();
   intr.Render();
-  auto t2 = high_resolution_clock::now();
-  duration<double, std::milli> diff = t2 - t1;
   std::cout << "64 Samples" << std::endl;
-  std::cout << "Time: " << diff.count() / 1000 << " seconds"
+  std::cout << "Time: " << bm.GetTime(true) << " seconds"
             << std::endl;
   film.display->WaitUntilClosed();
   //    film.display->UpdateImage();
@@ -145,6 +147,4 @@ int main(int argc, char *argv[])
   // Parse provided scene description files TODO
   // Render the scene TODO
   // Clean up after rendering the scene TODO
-  /*
-   */
 }

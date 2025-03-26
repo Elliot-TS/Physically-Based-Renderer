@@ -19,7 +19,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 add_subdirectory(pbrt)
 add_subdirectory(ObjLoader)
-#add_subdirectory(pbrt/util)
+add_subdirectory(nanobench)
 
 find_package(
     OpenCV 4.9.0 REQUIRED
@@ -35,6 +35,7 @@ add_executable(Renderer WIN32 main.cpp)
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 target_link_libraries(
     Renderer PUBLIC
+    nanobench
     pbrt
     SDL3::SDL3
     ${OpenCV_LIBS}
