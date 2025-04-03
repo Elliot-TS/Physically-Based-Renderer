@@ -48,6 +48,10 @@ struct alignas(32) LinearBVHNode {
   uint16_t nPrimitives;
   uint8_t axis;
 };
+struct BVHSplitBucket {
+  int count = 0;
+  Bounds3f bounds;
+};
 
 class SimpleAggregate : public Primitive {
  public:
@@ -90,6 +94,14 @@ class BVHAggregate : public Primitive {
   bool partitionMiddle(
       std::span<BVHPrimitive> &bvhPrimitives,
       Bounds3f centroidBounds, int dim, int *mid
+  );
+  void partitionSAH(
+      std::span<BVHPrimitive> &bvhPrimitives,
+      Bounds3f centroidBounds, int dim, int *mid,
+      Bounds3f primitiveBounds, std::atomic<int> *totalNodes,
+      std::atomic<int> *orderedPrimsOffset,
+      std::vector<Primitive *> &orderedPrims, Bounds3f bounds,
+      BVHBuildNode *node
   );
   void partitionEqualCounts(
       std::span<BVHPrimitive> &bvhPrimitives, int dim, int *mid

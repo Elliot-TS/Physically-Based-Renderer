@@ -80,7 +80,7 @@ BVHAggregate::BVHAggregate(
   // TODO: Free BVHBuildNodes
 }
 
-void BVHAggregate::buildLeafNode(
+inline void BVHAggregate::buildLeafNode(
     std::span<BVHPrimitive> &bvhPrimitives,
     std::atomic<int> *totalNodes,
     std::atomic<int> *orderedPrimsOffset,
@@ -159,6 +159,14 @@ BVHBuildNode *BVHAggregate::buildRecursive(
           partitionEqualCounts(bvhPrimitives, dim, &mid);
           break;
         }
+        case SplitMethod::SAH: {
+          partitionSAH(
+              bvhPrimitives, centroidBounds, dim, &mid, bounds,
+              totalNodes, orderedPrimsOffset, orderedPrims,
+              bounds, node
+          );
+          break;
+        }
         default:
           ERROR("The BVH Split Method is not implemented.");
       }
@@ -182,7 +190,97 @@ BVHBuildNode *BVHAggregate::buildRecursive(
   }
 }
 
-bool BVHAggregate::partitionMiddle(
+inline void BVHAggregate::partitionSAH(
+    std::span<BVHPrimitive> &bvhPrimitives,
+    Bounds3f centroidBounds, int dim, int *mid,
+    Bounds3f primitiveBounds, std::atomic<int> *totalNodes,
+    std::atomic<int> *orderedPrimsOffset,
+    std::vector<Primitive *> &orderedPrims, Bounds3f bounds,
+    BVHBuildNode *node
+)
+{
+  // TODO: Currently working on 03/31 10:51
+  if (bvhPrimitives.size() <= 2) {
+    // Partition primitives into equally sized subsets
+    partitionEqualCounts(bvhPrimitives, dim, mid);
+  }
+  else {
+    // Allocate BVHSplitBucket for SAH partition buckets.
+    constexpr int nBuckets = 12;
+    BVHSplitBucket buckets[nBuckets];
+
+    // Initialize BVHSplitBucket for SAH partition buckets.
+    for (auto prim : bvhPrimitives) {
+      // Determine which bucket index the primitive lies in
+      // We multiply by 0.999 so bucket is the range
+      // [0,nBuckets-1]
+      int bucketIndex =
+          (nBuckets * 0.999) *
+          centroidBounds.Offset(prim.Centroid())[dim];
+      buckets[bucketIndex].bounds =
+          Union(buckets[bucketIndex].bounds, prim.bounds);
+      buckets[bucketIndex].count++;
+    }
+
+    // Compute cost for split that minimizes SAH metric.
+    // Cost of split A|B =
+    //    1/2 prob_A * A.count + prob_B * B.count
+    // TODO: See if you can do this in one pass
+    int costs[nBuckets - 1] = {};
+    int countBelow = 0;
+    Bounds3f boundsBelow;
+    for (int i = 0; i < nBuckets - 1; ++i) {
+      countBelow += buckets[i].count;
+      boundsBelow = Union(boundsBelow, buckets[i].bounds);
+      costs[i] += boundsBelow.SurfaceArea() * countBelow;
+    }
+
+    int countAbove = 0;
+    Bounds3f boundsAbove;
+    for (int i = nBuckets - 2; i >= 0; --i) {
+      countAbove += buckets[i].count;
+      boundsAbove = Union(boundsAbove, buckets[i].bounds);
+      costs[i] += boundsAbove.SurfaceArea() * countAbove;
+    }
+
+    // Find which split bucket would lead to the least cost
+    int minCostBucket = -1;
+    Float minCost = Infinity;
+    for (int i = 0; i < nBuckets - 1; ++i) {
+      if (costs[i] < minCost) {
+        minCostBucket = i;
+        minCost = costs[i];
+      }
+    }
+
+    // Either create leaf or split primitives at selected SAH
+    // bucket.
+    Float leafCost = bvhPrimitives.size();
+    minCost = 1 / 2.f + minCost / primitiveBounds.SurfaceArea();
+    if (bvhPrimitives.size() > maxPrimsInNode ||
+        minCost < leafCost)
+    {
+      auto midIter = std::partition(
+          bvhPrimitives.begin(), bvhPrimitives.end(),
+          [=](const BVHPrimitive &bp) {
+            int bucketIndex =
+                (nBuckets * 0.999) *
+                centroidBounds.Offset(bp.Centroid())[dim];
+            return bucketIndex <= minCostBucket;
+          }
+      );
+      *mid = midIter - bvhPrimitives.begin();
+    }
+    else {
+      buildLeafNode(
+          bvhPrimitives, totalNodes, orderedPrimsOffset,
+          orderedPrims, bounds, node
+      );
+    }
+  }
+}
+
+inline bool BVHAggregate::partitionMiddle(
     std::span<BVHPrimitive> &bvhPrimitives,
     Bounds3f centroidBounds, int dim, int *mid
 )
@@ -199,7 +297,7 @@ bool BVHAggregate::partitionMiddle(
   return midIter != bvhPrimitives.begin() &&
          midIter != bvhPrimitives.end();
 }
-void BVHAggregate::partitionEqualCounts(
+inline void BVHAggregate::partitionEqualCounts(
     std::span<BVHPrimitive> &bvhPrimitives, int dim, int *mid
 )
 {

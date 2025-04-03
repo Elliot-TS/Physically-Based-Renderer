@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
 
   bm.Start();
   BVHAggregate aggregate(
-      primitives, numShapes, BVHAggregate::SplitMethod::Middle
+      primitives, numShapes, BVHAggregate::SplitMethod::SAH
   );
   // SimpleAggregate aggregate(&primitives[0], numShapes);
   std::cout << "Create aggregate: " << bm.GetTime() << " ms\n";
