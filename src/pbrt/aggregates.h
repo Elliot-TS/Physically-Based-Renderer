@@ -95,7 +95,8 @@ class BVHAggregate : public Primitive {
       std::span<BVHPrimitive> &bvhPrimitives,
       Bounds3f centroidBounds, int dim, int *mid
   );
-  void partitionSAH(
+  // Returns whether a leaf node was created
+  bool partitionSAH(
       std::span<BVHPrimitive> &bvhPrimitives,
       Bounds3f centroidBounds, int dim, int *mid,
       Bounds3f primitiveBounds, std::atomic<int> *totalNodes,

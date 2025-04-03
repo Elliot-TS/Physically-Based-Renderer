@@ -160,11 +160,14 @@ BVHBuildNode *BVHAggregate::buildRecursive(
           break;
         }
         case SplitMethod::SAH: {
-          partitionSAH(
-              bvhPrimitives, centroidBounds, dim, &mid, bounds,
-              totalNodes, orderedPrimsOffset, orderedPrims,
-              bounds, node
-          );
+          if (partitionSAH(
+                  bvhPrimitives, centroidBounds, dim, &mid,
+                  bounds, totalNodes, orderedPrimsOffset,
+                  orderedPrims, bounds, node
+              ))
+          {
+            return node;
+          }
           break;
         }
         default:
@@ -190,7 +193,7 @@ BVHBuildNode *BVHAggregate::buildRecursive(
   }
 }
 
-inline void BVHAggregate::partitionSAH(
+inline bool BVHAggregate::partitionSAH(
     std::span<BVHPrimitive> &bvhPrimitives,
     Bounds3f centroidBounds, int dim, int *mid,
     Bounds3f primitiveBounds, std::atomic<int> *totalNodes,
@@ -276,8 +279,10 @@ inline void BVHAggregate::partitionSAH(
           bvhPrimitives, totalNodes, orderedPrimsOffset,
           orderedPrims, bounds, node
       );
+      return true;
     }
   }
+  return false;
 }
 
 inline bool BVHAggregate::partitionMiddle(

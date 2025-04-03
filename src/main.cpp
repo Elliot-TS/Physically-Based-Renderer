@@ -38,10 +38,17 @@ Float hit_sphere(
 int main(int argc, char *argv[])
 {
   // How to Read command line arguments
-  // if (argc >= 2) {
-  // std::istringstream iss( argv[1] );
-  // if (!(iss >> val)) return -1;
-  //} else return -1;
+  std::string filename;
+  if (argc >= 2) {
+    filename = argv[1];
+    std::cout << "Filename provided: " << filename << std::endl;
+  }
+  else {
+    filename = "test.obj";
+    std::cout << "No filename provided.  Using default: "
+              << filename << std::endl;
+  }
+
 
   // Ray tracing in a weekend
 
@@ -65,7 +72,7 @@ int main(int argc, char *argv[])
 
   bm.Start();
   objl::Loader Loader;
-  bool loadout = Loader.LoadFile("test2.obj");
+  bool loadout = Loader.LoadFile(filename);
   if (!loadout) return 1;
 
   // Go through each loaded mesh
