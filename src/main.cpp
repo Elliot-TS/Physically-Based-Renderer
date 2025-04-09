@@ -77,6 +77,7 @@ int main(int argc, char *argv[])
 
   // Go through each loaded mesh
   std::vector<std::unique_ptr<Shape>> triangles;
+  Transform objectTransform(Scale(2.2, 1.2, 1.2));
   for (int i = 0; i < Loader.LoadedMeshes.size(); ++i) {
     objl::Mesh loadedMesh = Loader.LoadedMeshes[i];
 
@@ -92,7 +93,9 @@ int main(int argc, char *argv[])
 
     // Triangle Mesh
     Triangle::CreateTriangles(
-        new TriangleMesh(vertices, loadedMesh.Indices),
+        new TriangleMesh(
+            objectTransform, vertices, loadedMesh.Indices
+        ),
         &triangles
     );
   }

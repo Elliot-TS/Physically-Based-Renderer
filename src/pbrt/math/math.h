@@ -104,6 +104,39 @@ std::optional<SquareMatrix<N>> LinearLeastSquares(
   return Transpose(*AtAi * AtB);
 }
 
+// Functions for initializing matrices
+namespace {
+  template <int N>
+  inline void init(Float m[N][N], int i, int j)
+  {}
+
+  template <int N, typename... Args>
+  inline void init(
+      Float m[N][N], int i, int j, Float v, Args... args
+  )
+  {
+    m[i][j] = v;
+    if (++j == N) {
+      ++i;
+      j = 0;
+    }
+    init<N>(m, i, j, args...);
+  }
+
+  template <int N>
+  inline void initDiag(Float m[N][N], int i)
+  {}
+
+  template <int N, typename... Args>
+  inline void initDiag(
+      Float m[N][N], int i, Float v, Args... args
+  )
+  {
+    m[i][i] = v;
+    initDiag<N>(m, i + 1, args...);
+  }
+}  // namespace
+
 // SquareMatrix Definition
 template <int N>
 class SquareMatrix {

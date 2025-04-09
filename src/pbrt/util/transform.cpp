@@ -3,7 +3,7 @@
 // Apache License, Version 2.0. SPDX: Apache-2.0
 
 #include <pbrt/interaction.h>
-#include <pbrt/util/check.h>
+#include <pbrt/test/check.h>
 // #include <pbrt/util/error.h>
 #include <pbrt/math/math.h>
 // #include <pbrt/util/print.h>
@@ -234,6 +234,7 @@ void Transform::Decompose(
   *S = InvertOrExit(*R) * M;
 }
 
+/*
 SurfaceInteraction Transform::operator()(
     const SurfaceInteraction &si
 ) const
@@ -330,18 +331,20 @@ Point3fi Transform::ApplyInverse(const Point3fi &p) const
   else
     return Point3fi(Point3f(xp, yp, zp), pOutError) / wp;
 }
+*/
 
 Interaction Transform::operator()(const Interaction &in) const
 {
   Interaction ret;
-  ret.pi = (*this)(in.pi);
-  ret.n = (*this)(in.n);
-  if (LengthSquared(ret.n) > 0) ret.n = Normalize(ret.n);
-  ret.uv = in.uv;
-  ret.wo = (*this)(in.wo);
-  if (LengthSquared(ret.wo) > 0) ret.wo = Normalize(ret.wo);
-  ret.time = in.time;
-  ret.mediumInterface = in.mediumInterface;
+  ret.point = (*this)(in.point);
+  ret.normal = (*this)(in.normal);
+  if (LengthSquared(ret.normal) > 0)
+    ret.normal = Normalize(ret.normal);
+  // ret.uv = in.uv;
+  // ret.wo = (*this)(in.wo);
+  // if (LengthSquared(ret.wo) > 0) ret.wo = Normalize(ret.wo);
+  // ret.time = in.time;
+  // ret.mediumInterface = in.mediumInterface;
   return ret;
 }
 
@@ -349,17 +352,19 @@ Interaction Transform::ApplyInverse(const Interaction &in) const
 {
   Interaction ret;
   Transform t = Inverse(*this);
-  ret.pi = t(in.pi);
-  ret.n = t(in.n);
-  if (LengthSquared(ret.n) > 0) ret.n = Normalize(ret.n);
-  ret.uv = in.uv;
-  ret.wo = t(in.wo);
-  if (LengthSquared(ret.wo) > 0) ret.wo = Normalize(ret.wo);
-  ret.time = in.time;
-  ret.mediumInterface = in.mediumInterface;
+  ret.point = t(in.point);
+  ret.normal = t(in.normal);
+  if (LengthSquared(ret.normal) > 0)
+    ret.normal = Normalize(ret.normal);
+  // ret.uv = in.uv;
+  // ret.wo = t(in.wo);
+  // if (LengthSquared(ret.wo) > 0) ret.wo = Normalize(ret.wo);
+  // ret.time = in.time;
+  // ret.mediumInterface = in.mediumInterface;
   return ret;
 }
 
+/*
 SurfaceInteraction Transform::ApplyInverse(
     const SurfaceInteraction &si
 ) const
@@ -396,14 +401,15 @@ SurfaceInteraction Transform::ApplyInverse(
   ret.faceIndex = si.faceIndex;
   return ret;
 }
+*/
 
-std::string Transform::ToString() const
-{
-  return StringPrintf("[ m: %s mInv: %s ]", m, mInv);
-}
+// std::string Transform::ToString() const
+//{
+// return StringPrintf("[ m: %s mInv: %s ]", m, mInv);
+//}
 
 // AnimatedTransform Method Definitions
-AnimatedTransform::AnimatedTransform(
+/*AnimatedTransform::AnimatedTransform(
     const Transform &startTransform, Float startTime,
     const Transform &endTransform, Float endTime
 )
@@ -1360,11 +1366,10 @@ std::string AnimatedTransform::ToString() const
 {
   return StringPrintf(
       "[ AnimatedTransform startTransform: %s endTransform: %s "
-      "startTime: %f endTime: %f actuallyAnimated: %s T: [ %s %s ] "
-      "R: [ %s %s ] S: [ %s %s ] hasRotation: %s ]",
-      startTransform, endTransform, startTime, endTime,
-      actuallyAnimated, T[0], T[1], R[0], R[1], S[0], S[1],
-      hasRotation
+      "startTime: %f endTime: %f actuallyAnimated: %s T: [ %s %s
+] " "R: [ %s %s ] S: [ %s %s ] hasRotation: %s ]", startTransform,
+endTransform, startTime, endTime, actuallyAnimated, T[0], T[1],
+R[0], R[1], S[0], S[1], hasRotation
   );
 }
 
@@ -1385,8 +1390,8 @@ Transform AnimatedTransform::Interpolate(Float time) const
   // Interpolate scale at _dt_
   SquareMatrix<4> scale = (1 - dt) * S[0] + dt * S[1];
 
-  // Return interpolated matrix as product of interpolated components
-  return Translate(trans) * Transform(rotate) *
+  // Return interpolated matrix as product of interpolated
+components return Translate(trans) * Transform(rotate) *
          Transform(scale);
 }
 
@@ -1438,14 +1443,12 @@ void AnimatedTransform::FindZeros(
     int *nZeros, int depth
 )
 {
-  // Evaluate motion derivative in interval form, return if no zeros
-  Interval dadt = Interval(c1) +
-                  (Interval(c2) + Interval(c3) * tInterval) *
-                      Cos(Interval(2 * theta) * tInterval) +
-                  (Interval(c4) + Interval(c5) * tInterval) *
-                      Sin(Interval(2 * theta) * tInterval);
-  if (dadt.LowerBound() > 0 || dadt.UpperBound() < 0 ||
-      dadt.LowerBound() == dadt.UpperBound())
+  // Evaluate motion derivative in interval form, return if no
+zeros Interval dadt = Interval(c1) + (Interval(c2) +
+Interval(c3) * tInterval) * Cos(Interval(2 * theta) * tInterval)
++ (Interval(c4) + Interval(c5) * tInterval) * Sin(Interval(2 *
+theta) * tInterval); if (dadt.LowerBound() > 0 ||
+dadt.UpperBound() < 0 || dadt.LowerBound() == dadt.UpperBound())
     return;
 
   // Either split range and recurse or report a zero
@@ -1492,4 +1495,5 @@ void AnimatedTransform::FindZeros(
   }
 }
 
+*/
 }  // namespace pbrt

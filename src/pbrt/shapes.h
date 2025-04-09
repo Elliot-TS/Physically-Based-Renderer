@@ -5,6 +5,7 @@
 #include "pbrt/interaction.h"
 #include "pbrt/ray.h"
 #include "pbrt/util/buffercache.h"
+#include "pbrt/util/transform.h"
 
 namespace pbrt {
 
@@ -65,19 +66,18 @@ class TriangleMesh {
   const Point3f *vertexPositions = nullptr;
 
   TriangleMesh(
-      std::vector<Point3f> positions,
+      const Transform &renderFromObject,
+      std::vector<Point3f>
+          positions,
       std::vector<unsigned int>
           indeces
   )
       : nTriangles(indeces.size() / 3),
         nVertices(positions.size())
   {
-    // TODO: Transform positions from object space to render
-    // space Constructor should take a render space transform
-    // object
-    vertexPositions = point3BufferCache->LookupOrAdd(positions);
-
     vertexIndeces = uintBufferCache->LookupOrAdd(indeces);
+    for (Point3f &pt : positions) pt = renderFromObject(pt);
+    vertexPositions = point3BufferCache->LookupOrAdd(positions);
   }
 };
 
