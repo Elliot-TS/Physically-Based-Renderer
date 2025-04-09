@@ -93,19 +93,29 @@ class Triangle : public Shape {
   {}
   Bounds3f Bounds() const;
 
-  static std::vector<std::unique_ptr<Shape>> CreateTriangles(
-      const TriangleMesh *mesh
+  static void CreateTriangles(
+      const TriangleMesh *mesh,
+      std::vector<std::unique_ptr<Shape>> *triangles
   );
+
+  static void LoadVertices(
+      const TriangleMesh *mesh, int triIndex, Point3f *p0,
+      Point3f *p1, Point3f *p2
+  )
+  {
+    const unsigned int *v = &mesh->vertexIndeces[3 * triIndex];
+    *p0 = mesh->vertexPositions[v[0]];
+    *p1 = mesh->vertexPositions[v[1]];
+    *p2 = mesh->vertexPositions[v[2]];
+  }
 
   static SurfaceInteraction InteractionFromIntersection(
       const TriangleMesh *mesh, int triIndex,
       TriangleIntersection ti, Float time, Vector3f wo
   )
   {
-    const unsigned int *v = &mesh->vertexIndeces[3 * triIndex];
-    Point3f p0 = mesh->vertexPositions[v[0]],
-            p1 = mesh->vertexPositions[v[1]],
-            p2 = mesh->vertexPositions[v[2]];
+    Point3f p0, p1, p2;
+    LoadVertices(mesh, triIndex, &p0, &p1, &p2);
 
     // Find the hit point
     Point3f pHit = ti.b0 * p0 + ti.b1 * p1 + ti.b2 * p2;
@@ -117,30 +127,34 @@ class Triangle : public Shape {
     return SurfaceInteraction(pHit, n);
   }
 
+
   std::optional<ShapeIntersection> Intersect(
       const Ray &ray, Float tMax = Infinity
   ) const;
   virtual bool IntersectP(const Ray &ray, Float tMax = Infinity)
       const;
 
+  void LoadVertices(Point3f *p0, Point3f *p1, Point3f *p2) const
+  {
+    const TriangleMesh *mesh = GetMesh();
+    LoadVertices(mesh, triIndex, p0, p1, p2);
+  }
+  Float Area() const
+  {
+    Point3f p0, p1, p2;
+    LoadVertices(&p0, &p1, &p2);
+    return 0.5f * Length(Cross(p1 - p0, p2 - p0));
+  }
+
   static void Init();
 
- private:
+  // private:
   int meshIndex = -1, triIndex = -1;
   static std::vector<const TriangleMesh *> *allMeshes;
 
   const TriangleMesh *GetMesh() const
   {
     return (*allMeshes)[meshIndex];
-  }
-  Float Area() const
-  {
-    const TriangleMesh *mesh = GetMesh();
-    const unsigned int *v = &mesh->vertexIndeces[3 * triIndex];
-    Point3f p0 = mesh->vertexPositions[v[0]],
-            p1 = mesh->vertexPositions[v[1]],
-            p2 = mesh->vertexPositions[v[2]];
-    return 0.5f * Length(Cross(p1 - p0, p2 - p0));
   }
 };
 }  // namespace pbrt

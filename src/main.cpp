@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 
   Film film(nx, ny);
   Camera cam(
-      &film, Point3f(0, 1, -3), Vector3f(0, -0.6, 1), 80,
+      &film, Point3f(-2, 2, 4), Point3f(0, 0, 0), 80,
       aspectRatio
   );
 
@@ -76,7 +76,6 @@ int main(int argc, char *argv[])
   if (!loadout) return 1;
 
   // Go through each loaded mesh
-  std::vector<TriangleMesh> triMeshes;
   std::vector<std::unique_ptr<Shape>> triangles;
   for (int i = 0; i < Loader.LoadedMeshes.size(); ++i) {
     objl::Mesh loadedMesh = Loader.LoadedMeshes[i];
@@ -92,14 +91,9 @@ int main(int argc, char *argv[])
     }
 
     // Triangle Mesh
-    triMeshes.push_back(
-        TriangleMesh(vertices, loadedMesh.Indices)
-    );
-    auto newTriangles =
-        Triangle::CreateTriangles(&triMeshes.back());
-    std::move(
-        newTriangles.begin(), newTriangles.end(),
-        std::back_inserter(triangles)
+    Triangle::CreateTriangles(
+        new TriangleMesh(vertices, loadedMesh.Indices),
+        &triangles
     );
   }
 
@@ -129,7 +123,8 @@ int main(int argc, char *argv[])
 
   bm.Start();
   BVHAggregate aggregate(
-      primitives, numShapes, BVHAggregate::SplitMethod::SAH
+      primitives, primitives.size(),
+      BVHAggregate::SplitMethod::SAH
   );
   // SimpleAggregate aggregate(&primitives[0], numShapes);
   std::cout << "Create aggregate: " << bm.GetTime() << " ms\n";

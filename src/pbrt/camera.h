@@ -96,6 +96,12 @@ class Camera {
     horizontal *= 2;
     vertical *= 2;
   }
+  Camera(
+      Film *film, Point3f origin, Point3f lookAt,
+      Float fov = 67, Float aspectRatio = 2
+  )
+      : Camera(film, origin, lookAt - origin, fov, aspectRatio)
+  {}
 
   Ray get_ray(const Float u, const Float v) const
   {
