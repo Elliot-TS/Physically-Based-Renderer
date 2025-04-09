@@ -1,43 +1,49 @@
 [
 {
   "directory": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/bin",
-  "command": "/usr/bin/c++  -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/bin\" -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src\" -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/nanobench/src/include\" -isystem /usr/include/opencv4 -ltbb -O3 -std=gnu++20 -o CMakeFiles/Renderer.dir/main.cpp.o -c \"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/main.cpp\"",
+  "command": "/usr/bin/c++  -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/bin\" -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src\" -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/nanobench/src/include\" -isystem /usr/include/opencv4 -ltbb -g -std=gnu++20 -o CMakeFiles/Renderer.dir/main.cpp.o -c \"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/main.cpp\"",
   "file": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/main.cpp",
   "output": "CMakeFiles/Renderer.dir/main.cpp.o"
 },
 {
   "directory": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/bin/pbrt",
-  "command": "/usr/bin/c++  -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src\" -ltbb -O3 -std=gnu++20 -o CMakeFiles/pbrt.dir/shapes.cpp.o -c \"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/pbrt/shapes.cpp\"",
+  "command": "/usr/bin/c++  -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src\" -ltbb -g -std=gnu++20 -o CMakeFiles/pbrt.dir/shapes.cpp.o -c \"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/pbrt/shapes.cpp\"",
   "file": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/pbrt/shapes.cpp",
   "output": "pbrt/CMakeFiles/pbrt.dir/shapes.cpp.o"
 },
 {
   "directory": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/bin/pbrt",
-  "command": "/usr/bin/c++  -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src\" -ltbb -O3 -std=gnu++20 -o CMakeFiles/pbrt.dir/aggregates.cpp.o -c \"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/pbrt/aggregates.cpp\"",
+  "command": "/usr/bin/c++  -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src\" -ltbb -g -std=gnu++20 -o CMakeFiles/pbrt.dir/aggregates.cpp.o -c \"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/pbrt/aggregates.cpp\"",
   "file": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/pbrt/aggregates.cpp",
   "output": "pbrt/CMakeFiles/pbrt.dir/aggregates.cpp.o"
 },
 {
   "directory": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/bin/pbrt",
-  "command": "/usr/bin/c++  -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src\" -ltbb -O3 -std=gnu++20 -o CMakeFiles/pbrt.dir/integrator.cpp.o -c \"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/pbrt/integrator.cpp\"",
+  "command": "/usr/bin/c++  -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src\" -ltbb -g -std=gnu++20 -o CMakeFiles/pbrt.dir/integrator.cpp.o -c \"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/pbrt/integrator.cpp\"",
   "file": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/pbrt/integrator.cpp",
   "output": "pbrt/CMakeFiles/pbrt.dir/integrator.cpp.o"
 },
 {
   "directory": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/bin/pbrt",
-  "command": "/usr/bin/c++  -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src\" -ltbb -O3 -std=gnu++20 -o CMakeFiles/pbrt.dir/util/parallel.cpp.o -c \"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/pbrt/util/parallel.cpp\"",
+  "command": "/usr/bin/c++  -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src\" -ltbb -g -std=gnu++20 -o CMakeFiles/pbrt.dir/util/parallel.cpp.o -c \"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/pbrt/util/parallel.cpp\"",
   "file": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/pbrt/util/parallel.cpp",
   "output": "pbrt/CMakeFiles/pbrt.dir/util/parallel.cpp.o"
 },
 {
   "directory": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/bin/pbrt",
-  "command": "/usr/bin/c++  -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src\" -ltbb -O3 -std=gnu++20 -o CMakeFiles/pbrt.dir/util/buffercache.cpp.o -c \"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/pbrt/util/buffercache.cpp\"",
+  "command": "/usr/bin/c++  -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src\" -ltbb -g -std=gnu++20 -o CMakeFiles/pbrt.dir/util/buffercache.cpp.o -c \"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/pbrt/util/buffercache.cpp\"",
   "file": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/pbrt/util/buffercache.cpp",
   "output": "pbrt/CMakeFiles/pbrt.dir/util/buffercache.cpp.o"
 },
 {
+  "directory": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/bin/pbrt",
+  "command": "/usr/bin/c++  -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src\" -ltbb -g -std=gnu++20 -o CMakeFiles/pbrt.dir/math/math.cpp.o -c \"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/pbrt/math/math.cpp\"",
+  "file": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/pbrt/math/math.cpp",
+  "output": "pbrt/CMakeFiles/pbrt.dir/math/math.cpp.o"
+},
+{
   "directory": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/bin/nanobench",
-  "command": "/usr/bin/c++  -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/nanobench/src/include\" -ltbb -O3 -std=gnu++17 -o CMakeFiles/nanobench.dir/src/test/app/nanobench.cpp.o -c \"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/nanobench/src/test/app/nanobench.cpp\"",
+  "command": "/usr/bin/c++  -I\"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/nanobench/src/include\" -ltbb -g -std=gnu++17 -o CMakeFiles/nanobench.dir/src/test/app/nanobench.cpp.o -c \"/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/nanobench/src/test/app/nanobench.cpp\"",
   "file": "/home/elliots/Documents/Elliot Swaim/Education/2024-2025 (Senior)/Spring/Physically Based Rendering/renderer/src/nanobench/src/test/app/nanobench.cpp",
   "output": "nanobench/CMakeFiles/nanobench.dir/src/test/app/nanobench.cpp.o"
 }

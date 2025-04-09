@@ -5,6 +5,7 @@ add_library(pbrt
     integrator.cpp
     util/parallel.cpp
     util/buffercache.cpp
+    math/math.cpp
 )
 
 target_include_directories(

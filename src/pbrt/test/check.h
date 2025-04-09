@@ -1,8 +1,15 @@
 #pragma once
 #include <cassert>
 #define CHECK(x)        assert(x)
+#define CHECK_NE(a, b)  (CHECK(a != b))
+#define CHECK_EQ(a, b)  (CHECK(a == b))
 #define DCHECK(x)       (CHECK(x))
-#define DCHECK_NE(a, b) (CHECK(a != b))
+#define DCHECK_NE(a, b) (DCHECK(a != b))
+#define DCHECK_GT(a, b) (DCHECK(a > b))
+#define DCHECK_LT(a, b) (DCHECK(a < b))
+#define DCHECK_GE(a, b) (DCHECK(a >= b))
+#define DCHECK_LE(a, b) (DCHECK(a <= b))
+#define LOG_FATAL(s)    std::cerr << s << std::endl
 
 #define LOG(x)   std::cout << x << std::endl
 #define ERROR(x) std::cerr << x << std::endl
