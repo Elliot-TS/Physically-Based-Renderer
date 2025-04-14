@@ -30,19 +30,31 @@ find_package(
     COMPONENTS SDL3-shared
 )
 
-add_executable(Renderer WIN32 main.cpp)
-
 include_directories( ${OpenCV_INCLUDE_DIRS} )
-target_link_libraries(
-    Renderer PUBLIC
+
+add_executable(Renderer WIN32 pbrt/cmd/pbrt.cpp)
+target_link_libraries(Renderer PUBLIC 
     nanobench
     pbrt
     SDL3::SDL3
     ${OpenCV_LIBS}
 )
-
 target_include_directories(
     Renderer PUBLIC
+    "${PROJECT_BINARY_DIR}"
+    "${PROJECT_SOURCE_DIR}"
+)
+
+
+add_executable(Test WIN32 pbrt/cmd/pbrt-test.cpp)
+target_link_libraries(Test PUBLIC 
+    nanobench
+    pbrt
+    SDL3::SDL3
+    ${OpenCV_LIBS}
+)
+target_include_directories(
+    Test PUBLIC
     "${PROJECT_BINARY_DIR}"
     "${PROJECT_SOURCE_DIR}"
 )
