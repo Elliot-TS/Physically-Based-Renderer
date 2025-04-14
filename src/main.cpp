@@ -14,26 +14,6 @@
 
 using namespace pbrt;
 
-// Based off RTW
-
-// Based off RTW
-Float hit_sphere(
-    const Point3f center, Float radius, const Ray &r
-)
-{
-  Vector3f oc = r.origin - center;
-  Float a = Dot(r.direction, r.direction);
-  Float b = 2.0 * Dot(oc, r.direction);
-  Float c = Dot(oc, oc) - Sqr(radius);
-  Float discriminant = b * b - 4 * a * c;
-  if (discriminant < 0)
-    return -1.0;
-  else
-    return (-b - sqrt(discriminant)) / (2.0 * a);
-}
-
-// Based off RTW
-
 // Based off RTW and PBRT
 int main(int argc, char *argv[])
 {
