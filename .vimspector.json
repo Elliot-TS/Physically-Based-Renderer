@@ -5,7 +5,7 @@
       "filetypes": [ "cpp", "c", "objc", "rust" ],
       "configuration": {
         "request": "launch",
-        "program": "${workspaceRoot}/bin/Test",
+        "program": "${workspaceRoot}/bin/Renderer",
         "args": [],
         "cwd": "${workspaceRoot}",
         "environment": [],

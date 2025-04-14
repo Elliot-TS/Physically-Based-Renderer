@@ -1,4 +1,5 @@
 #include "pbrt/integrator.h"
+#include "pbrt/aggregates.h"
 #include "pbrt/util/parallel.h"
 
 namespace pbrt {
@@ -24,8 +25,10 @@ Vector3f color(
   }
   Vector3f unit_direction = Normalize(r.direction);
   Float t = 0.5 * (unit_direction.y + 1.0);
-  return (1.0 - t) * Vector3f(0.88, 0.96, 0.96) +
-         t * Vector3f(0.45, 0.73, 0.77);
+  return (
+      (1.0 - t) * Vector3f(0.88, 0.96, 0.96) +
+      t * Vector3f(0.45, 0.73, 0.77)
+  );
 }
 
 /** Integrator **/
@@ -60,7 +63,7 @@ void ImageTileIntegrator::Render()
                          // later, that's why we're making
                          // this alias
 
-  int spp = 16;  // Samples per pixel should be part of sampler
+  int spp = 128;  // Samples per pixel should be part of sampler
 
   int wid = camera->film->display->width;
   int hei = camera->film->display->height;

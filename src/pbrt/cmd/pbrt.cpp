@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 
   Film film(nx, ny);
   Camera cam(
-      &film, Point3f(-2, 2, 4), Point3f(0, 0, 0), 80,
+      &film, Point3f(4, 15, -30), Point3f(0, 0, 0), 4,
       aspectRatio
   );
 
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 
   // Go through each loaded mesh
   std::vector<std::unique_ptr<Shape>> triangles;
-  Transform objectTransform(Scale(2.2, 1.2, 1.2));
+  Transform objectTransform;  //(Scale(2.2, 1.2, 1.2));
   for (int i = 0; i < Loader.LoadedMeshes.size(); ++i) {
     objl::Mesh loadedMesh = Loader.LoadedMeshes[i];
 
@@ -79,14 +79,13 @@ int main(int argc, char *argv[])
         &triangles
     );
   }
-
   std::vector<Primitive *> primitives = {
       new GeometricPrimitive(
           new Sphere(Point3f(0, -100.5, -1), 100),
           new Lambertian(Vector3f(0.34, 0.58, 0.47), sampler)
       ),
       new GeometricPrimitive(
-          new Sphere(Point3f(1, 0, -1), 0.5),
+          new Sphere(Point3f(-1.9, 0, 0), 0.1),
           new Metal(Vector3f(0.8, 0.6, 0.2), 1.0, sampler)
       ),
       new GeometricPrimitive(
@@ -94,7 +93,7 @@ int main(int argc, char *argv[])
           new Metal(Vector3f(0.8, 0.8, 0.8), 0.3, sampler)
       ),
   };
-  int numShapes = 3;
+  int numShapes = primitives.size();
   for (int i = 0; i < triangles.size(); ++i) {
     primitives.push_back(new GeometricPrimitive(
         triangles[i].get(),
@@ -103,6 +102,8 @@ int main(int argc, char *argv[])
     numShapes++;
   }
   std::cout << "Created Meshes: " << bm.GetTime() << " ms \n";
+
+  std::cout << primitives[0]->Bounds() << std::endl;
 
   bm.Start();
   BVHAggregate aggregate(

@@ -144,6 +144,9 @@ class BVHAggregate : public Primitive {
   std::optional<ShapeIntersection> Intersect(
       const Ray &ray, Float tMax
   ) const;
+  std::optional<ShapeIntersection> Intersect(
+      const Ray &ray, Float tMax, double *trackBVHLayers
+  ) const;
   bool IntersectP(const Ray &ray, Float tMax) const;
 };
 

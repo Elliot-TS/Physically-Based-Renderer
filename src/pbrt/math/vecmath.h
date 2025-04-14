@@ -155,6 +155,7 @@ class Tuple2 {
   }
 
   friend std::ostream &operator<<(
+
       std::ostream &os, const Child<T> &obj
   )
   {
@@ -1438,6 +1439,13 @@ class Bounds3 {
   {
     return StringPrintf("[ %s - %s ]", pMin, pMax);
   }
+  friend std::ostream &operator<<(
+      std::ostream &os, const Bounds3<T> &obj
+  )
+  {
+    os << "[ " << obj.pMin << " - " << obj.pMax << " ]";
+    return os;
+  }
 
   // Bounds3 Public Members
   Point3<T> pMin, pMax;
@@ -1576,8 +1584,8 @@ inline bool Bounds3<T>::IntersectP(
   Float tyMin = (bounds[dirIsNeg[1]].y - o.y) * invDir.y;
   Float tyMax = (bounds[1 - dirIsNeg[1]].y - o.y) * invDir.y;
   // Update _tMax_ and _tyMax_ to ensure robust bounds intersection
-  tMax *= 1 + 2 * gamma(3);
-  tyMax *= 1 + 2 * gamma(3);
+  // tMax *= 1 + 2 * gamma(3);
+  // tyMax *= 1 + 2 * gamma(3);
 
   if (tMin > tyMax || tyMin > tMax) return false;
   if (tyMin > tMin) tMin = tyMin;
@@ -1587,7 +1595,7 @@ inline bool Bounds3<T>::IntersectP(
   Float tzMin = (bounds[dirIsNeg[2]].z - o.z) * invDir.z;
   Float tzMax = (bounds[1 - dirIsNeg[2]].z - o.z) * invDir.z;
   // Update _tzMax_ to ensure robust bounds intersection
-  tzMax *= 1 + 2 * gamma(3);
+  // tzMax *= 1 + 2 * gamma(3);
 
   if (tMin > tzMax || tzMin > tMax) return false;
   if (tzMin > tMin) tMin = tzMin;

@@ -340,9 +340,10 @@ int BVHAggregate::flattenBVH(BVHBuildNode *node, int *offset)
 }
 
 std::optional<ShapeIntersection> BVHAggregate::Intersect(
-    const Ray &ray, Float tMax
+    const Ray &ray, Float tMax, double *trackBVHLayers
 ) const
 {
+  *trackBVHLayers = 1.0;
   std::optional<ShapeIntersection> si;
   Vector3f invDir(
       1 / ray.direction.x,
@@ -352,8 +353,6 @@ std::optional<ShapeIntersection> BVHAggregate::Intersect(
   int dirIsNeg[3] = {
       int(invDir.x < 0), int(invDir.y < 0), int(invDir.z < 0)
   };
-
-  int numParents = 0;
 
   // Follow the ray through BVH nodes to find intersections
   int toVisitOffset = 0, currentNodeIndex = 0;
@@ -365,7 +364,7 @@ std::optional<ShapeIntersection> BVHAggregate::Intersect(
             ray.origin, ray.direction, tMax, invDir, dirIsNeg
         ))
     {
-      ++numParents;
+      *trackBVHLayers *= 0.99;
       // Leaf Node
       if (node->nPrimitives > 0) {
         // Intersect ray with primitives in leaf node
@@ -406,6 +405,14 @@ std::optional<ShapeIntersection> BVHAggregate::Intersect(
 
   return si;
 }
+std::optional<ShapeIntersection> BVHAggregate::Intersect(
+    const Ray &ray, Float tMax
+) const
+{
+  double trackBVHLayers = 1.0;
+  return Intersect(ray, tMax, &trackBVHLayers);
+}
+
 bool BVHAggregate::IntersectP(const Ray &ray, Float tMax) const
 {
   Vector3f invDir(

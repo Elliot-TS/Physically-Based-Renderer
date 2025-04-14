@@ -71,8 +71,8 @@ class Camera {
   {
     // Find the up vector
     Vector3f up(0, 1, 0);
-    if (direction.x == 0 && direction.y == 0) {
-      if (direction.z == 0)
+    if (direction.x == 0 && direction.z == 0) {
+      if (direction.y == 0)
         direction = Vector3f(0, 0, -1);
       else
         up = Vector3f(0, 0, 1);
