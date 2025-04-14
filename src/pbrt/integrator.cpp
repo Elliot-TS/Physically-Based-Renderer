@@ -63,7 +63,7 @@ void ImageTileIntegrator::Render()
                          // later, that's why we're making
                          // this alias
 
-  int spp = 128;  // Samples per pixel should be part of sampler
+  int spp = 512;  // Samples per pixel should be part of sampler
 
   int wid = camera->film->display->width;
   int hei = camera->film->display->height;

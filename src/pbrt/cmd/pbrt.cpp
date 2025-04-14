@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 
   Film film(nx, ny);
   Camera cam(
-      &film, Point3f(4, 15, -30), Point3f(0, 0, 0), 4,
+      &film, Point3f(2, 1.5, -2), Point3f(0, 0, 0), 50,
       aspectRatio
   );
 
