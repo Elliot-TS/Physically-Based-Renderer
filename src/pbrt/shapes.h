@@ -3,6 +3,7 @@
 #include <optional>
 #include <vector>
 #include "pbrt/interaction.h"
+#include "pbrt/pbrt.h"
 #include "pbrt/ray.h"
 #include "pbrt/util/buffercache.h"
 #include "pbrt/util/transform.h"
@@ -96,6 +97,11 @@ class Triangle : public Shape {
   static void CreateTriangles(
       const TriangleMesh *mesh,
       std::vector<std::unique_ptr<Shape>> *triangles
+  );
+  static void CreateTriangles(
+      const TriangleMesh *mesh,
+      std::vector<Primitive *> *primitives,
+      Material *material
   );
 
   static void LoadVertices(

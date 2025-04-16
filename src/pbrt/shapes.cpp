@@ -1,5 +1,6 @@
 // Adapted from RTW and PBRT
 #include "pbrt/shapes.h"
+#include "pbrt/primitive.h"
 namespace pbrt {
 // Sphere
 std::optional<ShapeIntersection> Sphere::Intersect(
@@ -81,6 +82,25 @@ void Triangle::CreateTriangles(
     triangles->push_back(
         std::make_unique<Triangle>(meshIndex, i)
     );
+  }
+}
+
+void Triangle::CreateTriangles(
+    const TriangleMesh *mesh,
+    std::vector<Primitive *> *primitives,
+    Material *material
+)
+{
+  static std::mutex allMeshLock;
+  allMeshLock.lock();
+  int meshIndex = int(allMeshes->size());
+  allMeshes->push_back(mesh);
+  allMeshLock.unlock();
+
+  for (int i = 0; i < mesh->nTriangles; ++i) {
+    primitives->push_back(new GeometricPrimitive(
+        new Triangle(meshIndex, i), material
+    ));
   }
 }
 
